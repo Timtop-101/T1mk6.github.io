@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Arduino Control</title>
+<style>
+  :root {
+    --bg: #0f1420;
+    --card: #1a2233;
+    --card2: #222c42;
+    --text: #e8edf7;
+    --muted: #8a96b0;
+    --accent: #3b82f6;
+    --on: #22c55e;
+    --off: #3a465f;
+    --danger: #ef4444;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+    line-height: 1.4;
+  }
+  header {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 28px;
+    background: var(--card);
+    border-bottom: 1px solid #2a3550;
+  }
+  header h1 { margin: 0; font-size: 28px; }
+  header h1 span { color: var(--accent); }
+  .status { display: flex; align-items: center; gap: 10px; font-size: 18px; color: var(--muted); }
+  .dot { width: 16px; height: 16px; border-radius: 50%; background: var(--danger); }
+  .dot.ok { background: var(--on); box-shadow: 0 0 12px var(--on); }
+  button {
+    font: inherit;
+    color: var(--text);
+    border: 0;
+    border-radius: 14px;
+    cursor: pointer;
+    transition: transform .08s, background .2s;
+  }
+  button:active { transform: scale(.96); }
+  .connect {
+    background: var(--accent);
+    font-size: 20px;
+    font-weight: 600;
+    padding: 14px 28px;
+  }
+  .connect.connected { background: var(--danger); }
+  main {
+    max-width: 1300px;
+    margin: 0 auto;
+    padding: 24px;
+    display: grid;
+    gap: 24px;
+    grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  }
+  .card {
+    background: var(--card);
+    border-radius: 20px;
+    padding: 24px;
+    border: 1px solid #2a3550;
+  }
+  .card h2 { margin: 0 0 18px; font-size: 22px; }
+  .card.wide { grid-column: 1 / -1; }
+  .pins {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 14px;
+  }
+  .pin {
+    background: var(--off);
+    padding: 22px 10px;
+    font-size: 20px;
+    font-weight: 600;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    align-items: center;
+  }
+  .pin small { font-weight: 400; color: #cbd5e8; font-size: 14px; }
+  .pin.on { background: var(--on); color: #06260f; }
+  .pin.on small { color: #0b3a1a; }
+  .all { display: flex; gap: 12px; margin-top: 18px; }
+  .all button { flex: 1; padding: 14px; font-size: 18px; background: var(--card2); }
+  .big-value { font-size: 64px; font-weight: 700; text-align: center; margin: 4px 0 14px; }
+  .big-value small { font-size: 24px; color: var(--muted); font-weight: 400; }
+  input[type=range] {
+    width: 100%;
+    height: 14px;
+    accent-color: var(--accent);
+    cursor: pointer;
+  }
+  .presets { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
+  .presets button { flex: 1; padding: 12px; background: var(--card2); font-size: 17px; min-width: 70px; }
+  .bar {
+    height: 36px;
+    background: var(--card2);
+    border-radius: 18px;
+    overflow: hidden;
+    margin-top: 10px;
+  }
+  .bar div {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #3b82f6, #22c55e);
+    transition: width .15s;
+  }
+  canvas { width: 100%; height: 160px; margin-top: 14px; background: var(--card2); border-radius: 12px; }
+  .log {
+    background: #0a0e17;
+    border-radius: 12px;
+    padding: 14px;
+    height: 200px;
+    overflow-y: auto;
+    font-family: ui-monospace, Consolas, monospace;
+    font-size: 15px;
+    color: #9fb0d0;
+  }
+  .log .tx { color: #7cc4ff; }
+  .log .err { color: var(--danger); }
+  .hint { color: var(--muted); font-size: 15px; margin-top: 10px; }
+  .warn {
+    display: none;
+    background: #4a1d1d;
+    color: #ffc9c9;
+    padding: 14px 28px;
+    font-size: 17px;
+  }
+  @media (max-width: 600px) {
+    header { padding: 16px; }
+    main { padding: 14px; gap: 14px; }
+    .big-value { font-size: 48px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="warn" id="warn">
+  Ваш браузер не поддерживает Web Serial. Откройте страницу в Chrome или Edge на компьютере.
+</div>
+
+<header>
+  <h1>Arduino <span>Control</span></h1>
+  <div class="status"><div class="dot" id="dot"></div><span id="statusText">Не подключено</span></div>
+  <button class="connect" id="connectBtn">Подключить Arduino</button>
+</header>
+
+<main>
+  <section class="card wide">
+    <h2>Цифровые выходы</h2>
+    <div class="pins" id="pins"></div>
+    <div class="all">
+      <button id="allOn">Включить все</button>
+      <button id="allOff">Выключить все</button>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Яркость / мощность (ШИМ, пин 6)</h2>
+    <div class="big-value"><span id="pwmVal">0</span><small> / 255</small></div>
+    <input type="range" id="pwm" min="0" max="255" value="0">
+    <div class="presets">
+      <button data-pwm="0">0%</button>
+      <button data-pwm="64">25%</button>
+      <button data-pwm="128">50%</button>
+      <button data-pwm="191">75%</button>
+      <button data-pwm="255">100%</button>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Серво (пин 10)</h2>
+    <div class="big-value"><span id="servoVal">90</span><small>°</small></div>
+    <input type="range" id="servo" min="0" max="180" value="90">
+    <div class="presets">
+      <button data-servo="0">0°</button>
+      <button data-servo="45">45°</button>
+      <button data-servo="90">90°</button>
+      <button data-servo="135">135°</button>
+      <button data-servo="180">180°</button>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Датчик (вход A0)</h2>
+    <div class="big-value"><span id="a0">—</span><small> / 1023</small></div>
+    <div class="bar"><div id="a0bar"></div></div>
+    <canvas id="chart" width="600" height="160"></canvas>
+    <div class="hint">Напряжение: <span id="volts">—</span> В</div>
+  </section>
+
+  <section class="card wide">
+    <h2>Схема подключения (Arduino Uno)</h2>
+    <svg id="wiring" viewBox="0 0 760 570" style="width:100%;max-width:900px;display:block;margin:0 auto;color:var(--text)" role="img" aria-label="Схема подключения"></svg>
+    <div class="hint">
+      Светодиод: длинная ножка (анод) к резистору, короткая (катод) к GND. Резистор 220 Ом.
+      Серво: сигнал (оранжевый/жёлтый) на D10, питание (красный) на 5V, земля (коричневый/чёрный) на GND.
+      Потенциометр: средний вывод на A0, крайние на 5V и GND. Все GND соединяйте вместе.
+      Мощное серво лучше питать от отдельного источника 5V, соединив его GND с GND Arduino.
+      Пин D13 связан со встроенным светодиодом платы. Максимальный ток одного пина: 20 мА.
+    </div>
+    <div class="presets">
+      <button onclick="window.open('schemes/A000066-full-pinout.pdf', '_blank')">Распиновка Uno (PDF)</button>
+      <button onclick="window.open('schemes/UNO-TH_Rev3e.sch', '_blank')">Схема (.sch, EAGLE)</button>
+      <button onclick="window.open('schemes/UNO-TH_Rev3e.brd', '_blank')">Плата (.brd, EAGLE)</button>
+    </div>
+  </section>
+
+  <section class="card wide">
+    <h2>Журнал</h2>
+    <div class="log" id="log"></div>
+  </section>
+</main>
+
+<script>
+  const PIN_LIST = [13, 2, 3, 4, 5, 7, 8];
+  const $ = (id) => document.getElementById(id);
+
+  let port = null;
+  let writer = null;
+  let reader = null;
+  let keepReading = false;
+  const pinState = {};
+  const history = [];
+
+  if (!('serial' in navigator)) $('warn').style.display = 'block';
+
+  // ---------- журнал ----------
+  function log(text, cls = '') {
+    const div = document.createElement('div');
+    if (cls) div.className = cls;
+    div.textContent = new Date().toLocaleTimeString() + '  ' + text;
+    const box = $('log');
+    box.appendChild(div);
+    while (box.children.length > 200) box.removeChild(box.firstChild);
+    box.scrollTop = box.scrollHeight;
+  }
+
+  // ---------- отправка ----------
+  async function send(cmd) {
+    if (!writer) { log('Сначала подключите Arduino', 'err'); return false; }
+    try {
+      await writer.write(new TextEncoder().encode(cmd + '\n'));
+      log('→ ' + cmd, 'tx');
+      return true;
+    } catch (e) {
+      log('Ошибка отправки: ' + e.message, 'err');
+      return false;
+    }
+  }
+
+  // ---------- пины ----------
+  const pinsBox = $('pins');
+  PIN_LIST.forEach((p) => {
+    pinState[p] = 0;
+    const b = document.createElement('button');
+    b.className = 'pin';
+    b.id = 'pin' + p;
+    b.innerHTML = 'D' + p + '<small>выкл</small>';
+    b.onclick = () => setPin(p, pinState[p] ? 0 : 1);
+    pinsBox.appendChild(b);
+  });
+
+  async function setPin(p, v) {
+    if (await send('D' + p + ':' + v)) {
+      pinState[p] = v;
+      const b = $('pin' + p);
+      b.classList.toggle('on', !!v);
+      b.querySelector('small').textContent = v ? 'вкл' : 'выкл';
+    }
+  }
+
+  $('allOn').onclick = async () => { for (const p of PIN_LIST) await setPin(p, 1); };
+  $('allOff').onclick = async () => { for (const p of PIN_LIST) await setPin(p, 0); };
+
+  // ---------- ШИМ ----------
+  let pwmTimer = 0;
+  function setPwm(v) {
+    $('pwm').value = v;
+    $('pwmVal').textContent = v;
+    clearTimeout(pwmTimer);
+    pwmTimer = setTimeout(() => send('P6:' + v), 40);
+  }
+  $('pwm').oninput = (e) => setPwm(e.target.value);
+  document.querySelectorAll('[data-pwm]').forEach((b) => b.onclick = () => setPwm(b.dataset.pwm));
+
+  // ---------- серво ----------
+  let servoTimer = 0;
+  function setServo(v) {
+    $('servo').value = v;
+    $('servoVal').textContent = v;
+    clearTimeout(servoTimer);
+    servoTimer = setTimeout(() => send('S10:' + v), 40);
+  }
+  $('servo').oninput = (e) => setServo(e.target.value);
+  document.querySelectorAll('[data-servo]').forEach((b) => b.onclick = () => setServo(b.dataset.servo));
+
+  // ---------- датчик ----------
+  function showA0(v) {
+    $('a0').textContent = v;
+    $('a0bar').style.width = (v / 1023 * 100) + '%';
+    $('volts').textContent = (v * 5 / 1023).toFixed(2);
+    history.push(v);
+    if (history.length > 120) history.shift();
+    drawChart();
+  }
+
+  function drawChart() {
+    const c = $('chart');
+    const ctx = c.getContext('2d');
+    ctx.clearRect(0, 0, c.width, c.height);
+    ctx.strokeStyle = '#3b82f6';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    history.forEach((v, i) => {
+      const x = i / 119 * c.width;
+      const y = c.height - (v / 1023) * (c.height - 10) - 5;
+      if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+    });
+    ctx.stroke();
+  }
+
+  // ---------- чтение ----------
+  async function readLoop() {
+    const decoder = new TextDecoderStream();
+    const closed = port.readable.pipeTo(decoder.writable).catch(() => {});
+    reader = decoder.readable.getReader();
+    let buf = '';
+    try {
+      while (keepReading) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        buf += value;
+        let i;
+        while ((i = buf.indexOf('\n')) >= 0) {
+          const line = buf.slice(0, i).trim();
+          buf = buf.slice(i + 1);
+          if (line.startsWith('A0:')) showA0(parseInt(line.slice(3), 10) || 0);
+          else if (line) log('← ' + line);
+        }
+      }
+    } catch (e) {
+      if (keepReading) log('Ошибка чтения: ' + e.message, 'err');
+    } finally {
+      try { reader.releaseLock(); } catch (e) {}
+      await closed;
+    }
+  }
+
+  // ---------- подключение ----------
+  function setConnected(ok) {
+    $('dot').classList.toggle('ok', ok);
+    $('statusText').textContent = ok ? 'Подключено' : 'Не подключено';
+    $('connectBtn').textContent = ok ? 'Отключить' : 'Подключить Arduino';
+    $('connectBtn').classList.toggle('connected', ok);
+  }
+
+  async function connect() {
+    try {
+      port = await navigator.serial.requestPort();
+      await port.open({ baudRate: 9600 });
+      writer = port.writable.getWriter();
+      keepReading = true;
+      setConnected(true);
+      log('Подключено');
+      readLoop();
+    } catch (e) {
+      log('Не удалось подключиться: ' + e.message, 'err');
+    }
+  }
+
+  async function disconnect() {
+    keepReading = false;
+    try { if (reader) await reader.cancel(); } catch (e) {}
+    try { if (writer) { writer.releaseLock(); writer = null; } } catch (e) {}
+    try { if (port) await port.close(); } catch (e) {}
+    port = null;
+    setConnected(false);
+    log('Отключено');
+  }
+
+  $('connectBtn').onclick = () => (port ? disconnect() : connect());
+
+  // ---------- схема подключения ----------
+  function drawWiring() {
+    const rows = [
+      ['D2', 'led'], ['D3', 'led'], ['D4', 'led'], ['D5', 'led'],
+      ['D6 (ШИМ)', 'led'], ['D7', 'led'], ['D8', 'led'], ['D13', 'led'],
+      ['D10', 'servo'], ['A0', 'pot']
+    ];
+    const y0 = 60, dy = 44, wire = '#8a96b0';
+    let s = '';
+    const lastLed = y0 + 7 * dy;
+    s += `<rect x="30" y="20" width="190" height="${y0 + 9 * dy - 20 + 84}" rx="14" fill="#1a2233" stroke="#3b82f6" stroke-width="2"/>`;
+    s += `<text x="125" y="${y0 + 4 * dy}" text-anchor="middle" font-size="22" font-weight="700" fill="currentColor">Arduino</text>`;
+    s += `<text x="125" y="${y0 + 4 * dy + 26}" text-anchor="middle" font-size="22" font-weight="700" fill="#3b82f6">UNO</text>`;
+    rows.forEach(([name, type], i) => {
+      const y = y0 + i * dy;
+      s += `<text x="212" y="${y + 5}" text-anchor="end" font-size="14" fill="currentColor">${name}</text>`;
+      s += `<line x1="220" y1="${y}" x2="300" y2="${y}" stroke="${wire}" stroke-width="2"/>`;
+      if (type === 'led') {
+        s += `<rect x="300" y="${y - 9}" width="60" height="18" rx="3" fill="none" stroke="#f59e0b" stroke-width="2"/>`;
+        s += `<text x="330" y="${y + 4}" text-anchor="middle" font-size="11" fill="#f59e0b">220 Ом</text>`;
+        s += `<line x1="360" y1="${y}" x2="420" y2="${y}" stroke="${wire}" stroke-width="2"/>`;
+        s += `<polygon points="420,${y - 12} 420,${y + 12} 444,${y}" fill="none" stroke="#22c55e" stroke-width="2"/>`;
+        s += `<line x1="444" y1="${y - 12}" x2="444" y2="${y + 12}" stroke="#22c55e" stroke-width="2"/>`;
+        s += `<line x1="444" y1="${y}" x2="620" y2="${y}" stroke="${wire}" stroke-width="2"/>`;
+        s += `<text x="470" y="${y - 8}" font-size="11" fill="#22c55e">светодиод</text>`;
+      } else if (type === 'servo') {
+        s += `<line x1="300" y1="${y}" x2="400" y2="${y}" stroke="${wire}" stroke-width="2"/>`;
+        s += `<rect x="400" y="${y - 16}" width="190" height="32" rx="6" fill="none" stroke="#a78bfa" stroke-width="2"/>`;
+        s += `<text x="495" y="${y + 5}" text-anchor="middle" font-size="13" fill="#a78bfa">Серво: сигнал</text>`;
+      } else {
+        s += `<line x1="300" y1="${y}" x2="400" y2="${y}" stroke="${wire}" stroke-width="2"/>`;
+        s += `<rect x="400" y="${y - 16}" width="190" height="32" rx="6" fill="none" stroke="#38bdf8" stroke-width="2"/>`;
+        s += `<text x="495" y="${y + 5}" text-anchor="middle" font-size="13" fill="#38bdf8">Потенциометр: средний</text>`;
+      }
+    });
+    // шина GND для светодиодов
+    s += `<line x1="620" y1="${y0}" x2="620" y2="${lastLed + 24}" stroke="${wire}" stroke-width="3"/>`;
+    s += `<line x1="600" y1="${lastLed + 24}" x2="640" y2="${lastLed + 24}" stroke="${wire}" stroke-width="3"/>`;
+    s += `<line x1="608" y1="${lastLed + 32}" x2="632" y2="${lastLed + 32}" stroke="${wire}" stroke-width="3"/>`;
+    s += `<line x1="615" y1="${lastLed + 40}" x2="625" y2="${lastLed + 40}" stroke="${wire}" stroke-width="3"/>`;
+    s += `<text x="650" y="${lastLed + 36}" font-size="14" fill="currentColor">GND (общий)</text>`;
+    // питание
+    const yp = y0 + 9 * dy + 40;
+    s += `<text x="212" y="${yp + 5}" text-anchor="end" font-size="14" fill="currentColor">5V</text>`;
+    s += `<line x1="220" y1="${yp}" x2="300" y2="${yp}" stroke="#ef4444" stroke-width="2"/>`;
+    s += `<text x="310" y="${yp + 5}" font-size="13" fill="#ef4444">→ серво (красный), потенциометр (крайний)</text>`;
+    s += `<text x="212" y="${yp + 30}" text-anchor="end" font-size="14" fill="currentColor">GND</text>`;
+    s += `<line x1="220" y1="${yp + 25}" x2="300" y2="${yp + 25}" stroke="${wire}" stroke-width="2"/>`;
+    s += `<text x="310" y="${yp + 30}" font-size="13" fill="currentColor">→ все светодиоды, серво (коричневый), потенциометр (крайний)</text>`;
+    $('wiring').innerHTML = s;
+  }
+  drawWiring();
+  drawChart();
+</script>
+</body>
+</html>
