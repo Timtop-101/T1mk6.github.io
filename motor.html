@@ -123,6 +123,76 @@
   </section>
 
   <section class="card wide">
+    <h2>Схема подключения</h2>
+    <svg viewBox="0 0 800 420" style="width:100%;max-width:900px;display:block;margin:0 auto;color:var(--text)" role="img" aria-label="Схема подключения мотора 28BYJ-48 через ULN2003 и датчика DHT11 к Arduino Uno" font-family="system-ui, Arial, sans-serif" font-size="14">
+      <!-- Arduino -->
+      <rect x="30" y="30" width="160" height="360" rx="14" fill="#1a2233" stroke="#3b82f6" stroke-width="2"/>
+      <text x="110" y="215" text-anchor="middle" font-size="22" font-weight="700" fill="currentColor">Arduino</text>
+      <text x="110" y="241" text-anchor="middle" font-size="22" font-weight="700" fill="#3b82f6">UNO</text>
+      <g fill="currentColor" text-anchor="end">
+        <text x="180" y="75">D8</text><text x="180" y="105">D9</text><text x="180" y="135">D10</text><text x="180" y="165">D11</text>
+        <text x="180" y="305">D2</text><text x="180" y="340">5V</text><text x="180" y="375">GND</text>
+      </g>
+
+      <!-- ULN2003 -->
+      <rect x="330" y="30" width="170" height="220" rx="10" fill="#1a2233" stroke="#a78bfa" stroke-width="2"/>
+      <text x="415" y="50" text-anchor="middle" font-size="16" font-weight="700" fill="#a78bfa">Плата ULN2003</text>
+      <g fill="currentColor"><text x="340" y="75">IN1</text><text x="340" y="105">IN2</text><text x="340" y="135">IN3</text><text x="340" y="165">IN4</text>
+        <text x="340" y="205">+ (5V)</text><text x="340" y="230">− (GND)</text></g>
+
+      <!-- провода к ULN -->
+      <line x1="190" y1="70" x2="330" y2="70" stroke="#f59e0b" stroke-width="3"/>
+      <line x1="190" y1="100" x2="330" y2="100" stroke="#22c55e" stroke-width="3"/>
+      <line x1="190" y1="130" x2="330" y2="130" stroke="#3b82f6" stroke-width="3"/>
+      <line x1="190" y1="160" x2="330" y2="160" stroke="#a78bfa" stroke-width="3"/>
+      <!-- 5V -->
+      <polyline points="190,335 260,335 260,200 330,200" fill="none" stroke="#ef4444" stroke-width="3"/>
+      <circle cx="260" cy="335" r="5" fill="#ef4444"/>
+      <!-- GND -->
+      <polyline points="190,370 240,370 240,225 330,225" fill="none" stroke="#8a96b0" stroke-width="3"/>
+      <circle cx="240" cy="370" r="5" fill="#8a96b0"/>
+
+      <!-- мотор -->
+      <line x1="500" y1="110" x2="610" y2="110" stroke="#e5e7eb" stroke-width="8" stroke-linecap="round"/>
+      <text x="555" y="95" text-anchor="middle" font-size="12" fill="currentColor">5-проводный</text>
+      <text x="555" y="132" text-anchor="middle" font-size="12" fill="currentColor">разъём мотора</text>
+      <rect x="610" y="60" width="170" height="100" rx="50" fill="#222c42" stroke="#22c55e" stroke-width="2"/>
+      <text x="695" y="105" text-anchor="middle" font-size="16" font-weight="700" fill="#22c55e">28BYJ-48</text>
+      <text x="695" y="125" text-anchor="middle" font-size="12" fill="currentColor">шаговый мотор 5V</text>
+
+      <!-- DHT11 -->
+      <rect x="330" y="280" width="170" height="110" rx="10" fill="#1a2233" stroke="#38bdf8" stroke-width="2"/>
+      <text x="415" y="270" text-anchor="middle" font-size="16" font-weight="700" fill="#38bdf8">Датчик DHT11</text>
+      <g fill="currentColor"><text x="340" y="305">out (данные)</text><text x="340" y="340">+ (5V)</text><text x="340" y="375">− (GND)</text></g>
+      <line x1="190" y1="300" x2="330" y2="300" stroke="#38bdf8" stroke-width="3"/>
+      <line x1="260" y1="335" x2="330" y2="335" stroke="#ef4444" stroke-width="3"/>
+      <line x1="190" y1="370" x2="330" y2="370" stroke="#8a96b0" stroke-width="3"/>
+      <circle cx="260" cy="335" r="5" fill="#ef4444"/>
+      <circle cx="240" cy="370" r="5" fill="#8a96b0"/>
+
+      <!-- легенда -->
+      <g font-size="13" fill="currentColor">
+        <text x="560" y="230" font-weight="700">Провода</text>
+        <text x="560" y="255"><tspan fill="#f59e0b">●</tspan> D8 → IN1</text>
+        <text x="560" y="275"><tspan fill="#22c55e">●</tspan> D9 → IN2</text>
+        <text x="560" y="295"><tspan fill="#3b82f6">●</tspan> D10 → IN3</text>
+        <text x="560" y="315"><tspan fill="#a78bfa">●</tspan> D11 → IN4</text>
+        <text x="560" y="335"><tspan fill="#38bdf8">●</tspan> D2 → out датчика</text>
+        <text x="560" y="355"><tspan fill="#ef4444">●</tspan> 5V → «+» платы и датчика</text>
+        <text x="560" y="375"><tspan fill="#8a96b0">●</tspan> GND → «−» платы и датчика</text>
+      </g>
+    </svg>
+    <div class="hint">
+      Штекер мотора вставляется в белый разъём платы ULN2003 одним способом (ключ на разъёме).
+      Для коротких проверок мотор можно питать от Arduino по USB, но надёжнее взять отдельный источник 5V:
+      тогда его «+» идёт на «+» платы ULN2003, а его «−» обязательно соединяется с GND Arduino.
+      Датчик DHT11 в виде платы с тремя контактами уже содержит нужный резистор; у голого 4-контактного датчика
+      между «данные» и «+» ставят резистор 10 кОм, а третий контакт (NC) остаётся свободным.
+      Не подключайте и не отключайте провода, когда питание включено.
+    </div>
+  </section>
+
+  <section class="card wide">
     <h2>Журнал</h2>
     <div class="log" id="log"></div>
   </section>
