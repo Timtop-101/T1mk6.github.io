@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>T1mk6 Arduino Control</title>
+<style>
+  :root {
+    --bg: #0f1420; --card: #1a2233; --card2: #222c42; --text: #e8edf7;
+    --muted: #8a96b0; --accent: #3b82f6; --on: #22c55e; --warn: #f59e0b; --danger: #ef4444;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif; line-height: 1.4; }
+  header { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; justify-content: space-between;
+    padding: 20px 28px; background: var(--card); border-bottom: 1px solid #2a3550; }
+  header h1 { margin: 0; font-size: 28px; }
+  header h1 span { color: var(--accent); }
+  .status { display: flex; align-items: center; gap: 10px; font-size: 18px; color: var(--muted); }
+  .dot { width: 16px; height: 16px; border-radius: 50%; background: var(--danger); }
+  .dot.ok { background: var(--on); box-shadow: 0 0 12px var(--on); }
+  button { font: inherit; color: var(--text); border: 0; border-radius: 14px; cursor: pointer;
+    transition: transform .08s, background .2s, opacity .2s; }
+  button:active { transform: scale(.96); }
+  button:disabled { opacity: .4; cursor: not-allowed; }
+  .connect { background: var(--accent); font-size: 20px; font-weight: 600; padding: 14px 28px; }
+  .connect.connected { background: var(--danger); }
+  main { max-width: 1300px; margin: 0 auto; padding: 24px; display: grid; gap: 24px;
+    grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); }
+  .card { background: var(--card); border-radius: 20px; padding: 24px; border: 1px solid #2a3550; }
+  .card h2 { margin: 0 0 18px; font-size: 22px; }
+  .card.wide { grid-column: 1 / -1; }
+  .big-value { font-size: 64px; font-weight: 700; text-align: center; margin: 4px 0 14px; }
+  .big-value small { font-size: 24px; color: var(--muted); font-weight: 400; }
+  .row { display: flex; gap: 12px; flex-wrap: wrap; }
+  .row button { flex: 1; min-width: 120px; padding: 20px 12px; font-size: 20px; font-weight: 600; background: var(--card2); }
+  .row button.fwd { background: #1d4ed8; }
+  .row button.rev { background: #7c3aed; }
+  .row button.stop { background: var(--danger); }
+  .turns { display: flex; gap: 10px; margin-bottom: 16px; }
+  .turns button { flex: 1; padding: 16px; font-size: 20px; background: var(--card2); }
+  .turns button.sel { background: var(--accent); }
+  input[type=range] { width: 100%; height: 14px; accent-color: var(--accent); cursor: pointer; }
+  .bar { height: 40px; background: var(--card2); border-radius: 20px; overflow: hidden; margin: 10px 0; }
+  .bar div { height: 100%; width: 0%; background: linear-gradient(90deg, #3b82f6, #22c55e); transition: width .2s; }
+  .state { text-align: center; font-size: 20px; font-weight: 600; }
+  .state.fault { color: var(--danger); }
+  .state.moving { color: var(--warn); }
+  .state.idle { color: var(--on); }
+  .sens { display: flex; gap: 14px; flex-wrap: wrap; }
+  .sens > div { flex: 1; min-width: 130px; background: var(--card2); border-radius: 16px; padding: 16px; text-align: center; }
+  .sens b { display: block; font-size: 44px; }
+  .sens span { color: var(--muted); font-size: 16px; }
+  .hint { color: var(--muted); font-size: 15px; margin-top: 10px; }
+  .log { background: #0a0e17; border-radius: 12px; padding: 14px; height: 200px; overflow-y: auto;
+    font-family: ui-monospace, Consolas, monospace; font-size: 15px; color: #9fb0d0; }
+  .log .tx { color: #7cc4ff; } .log .err { color: var(--danger); } .log .ev { color: var(--warn); }
+  .warn { display: none; background: #4a1d1d; color: #ffc9c9; padding: 14px 28px; font-size: 17px; }
+  @media (max-width: 600px) { header { padding: 16px; } main { padding: 14px; gap: 14px; } .big-value { font-size: 48px; } }
+</style>
+</head>
+<body>
+
+<div class="warn" id="warn">Ваш браузер не поддерживает Web Serial. Откройте страницу в Chrome или Edge на компьютере.</div>
+
+<header>
+  <h1>T1mk6 <span>Arduino Control</span></h1>
+  <div class="status"><div class="dot" id="dot"></div><span id="statusText">Не подключено</span></div>
+  <button class="connect" id="connectBtn">Подключить Arduino</button>
+</header>
+
+<main>
+  <section class="card">
+    <h2>Мотор 28BYJ-48</h2>
+    <div class="state idle" id="motorState">Ожидание подключения</div>
+    <div class="bar"><div id="progBar"></div></div>
+    <div class="big-value"><span id="progPct">0</span><small> %</small></div>
+    <div class="hint" style="text-align:center">Шагов: <span id="progSteps">0 / 0</span> · оборотов: <span id="progRev">0.00</span></div>
+  </section>
+
+  <section class="card">
+    <h2>Управление</h2>
+    <div class="turns" id="turns">
+      <button data-t="1" class="sel">1 оборот</button>
+      <button data-t="2">2 оборота</button>
+      <button data-t="3">3 оборота</button>
+    </div>
+    <div class="row">
+      <button class="rev" id="rev">⟲ Назад</button>
+      <button class="fwd" id="fwd">Вперёд ⟳</button>
+    </div>
+    <div class="row" style="margin-top:12px">
+      <button class="stop" id="stop">СТОП</button>
+      <button id="reset">Сбросить ошибку</button>
+    </div>
+    <div class="hint">Пока мотор крутится, страница сама шлёт keepalive. Если связь пропадёт, Arduino остановит мотор через 2,5 с.</div>
+  </section>
+
+  <section class="card">
+    <h2>Скорость</h2>
+    <div class="big-value"><span id="speedVal">5</span><small> / 10</small></div>
+    <input type="range" id="speed" min="1" max="10" value="5">
+    <div class="hint">1 — медленно, 10 — быстро. Скорость отправляется перед каждым запуском.</div>
+  </section>
+
+  <section class="card">
+    <h2>Датчик DHT11 (воздух в комнате)</h2>
+    <div class="sens">
+      <div><b id="temp">—</b><span>температура, °C</span></div>
+      <div><b id="hum">—</b><span>влажность, %</span></div>
+    </div>
+    <div class="hint" id="sensNote">Датчик опрашивается только когда мотор стоит.</div>
+  </section>
+
+  <section class="card wide">
+    <h2>Прочее</h2>
+    <div class="row">
+      <button id="ledOn">Светодиод вкл</button>
+      <button id="ledOff">Светодиод выкл</button>
+      <button id="ping">PING</button>
+      <button id="status">STATUS</button>
+    </div>
+  </section>
+
+  <section class="card wide">
+    <h2>Журнал</h2>
+    <div class="log" id="log"></div>
+  </section>
+</main>
+
+<script>
+  const $ = (id) => document.getElementById(id);
+  const STEPS_PER_REV = 2048;
+  const QUIET = new Set(['PROGRESS', 'KEEPALIVE', 'SENSOR']);   // не засоряют журнал
+
+  let port = null, writer = null, reader = null, keepReading = false;
+  let seqCounter = 1;
+  const pending = {};          // seq -> команда
+  let moving = false, fault = false, ready = false;
+  let turns = 1;
+  let lastKeepalive = 0, lastSensor = 0, pollTimer = null;
+
+  if (!('serial' in navigator)) $('warn').style.display = 'block';
+
+  // ---------- журнал ----------
+  function log(text, cls = '') {
+    const d = document.createElement('div');
+    if (cls) d.className = cls;
+    d.textContent = new Date().toLocaleTimeString() + '  ' + text;
+    const box = $('log');
+    box.appendChild(d);
+    while (box.children.length > 200) box.removeChild(box.firstChild);
+    box.scrollTop = box.scrollHeight;
+  }
+
+  // ---------- протокол: @SEQ|КОМАНДА|XOR ----------
+  function checksum(text) {
+    let x = 0;
+    for (let i = 0; i < text.length; i++) x ^= text.charCodeAt(i);
+    return x;
+  }
+  const hex2 = (n) => n.toString(16).toUpperCase().padStart(2, '0');
+
+  async function send(cmd) {
+    if (!writer) { log('Сначала подключите Arduino', 'err'); return false; }
+    const seq = (seqCounter++ & 0xFFFF).toString(16).toUpperCase().padStart(4, '0');
+    const body = seq + '|' + cmd;
+    pending[seq] = cmd;
+    try {
+      await writer.write(new TextEncoder().encode('@' + body + '|' + hex2(checksum(body)) + '\n'));
+      if (!QUIET.has(cmd)) log('→ ' + cmd, 'tx');
+      return true;
+    } catch (e) {
+      log('Ошибка отправки: ' + e.message, 'err');
+      return false;
+    }
+  }
+
+  function parseFrame(line) {
+    const marker = line[0];
+    if (marker !== '@' && marker !== '!') return null;
+    const rest = line.slice(1);
+    const bar = rest.lastIndexOf('|');
+    if (bar < 5) return null;
+    const body = rest.slice(0, bar);
+    const cs = parseInt(rest.slice(bar + 1), 16);
+    if (isNaN(cs) || checksum(body) !== cs) return null;
+    return { marker, seq: body.slice(0, 4), msg: body.slice(5) };
+  }
+
+  // ---------- состояние мотора ----------
+  function showMotor(state, done, total) {
+    const pct = total > 0 ? Math.min(100, Math.round(done / total * 100)) : 0;
+    $('progBar').style.width = pct + '%';
+    $('progPct').textContent = pct;
+    $('progSteps').textContent = done + ' / ' + total;
+    $('progRev').textContent = (done / STEPS_PER_REV).toFixed(2);
+    setState(state);
+  }
+
+  function setState(state) {
+    const el = $('motorState');
+    moving = state === 'MOVING';
+    fault = state === 'FAULT';
+    el.className = 'state ' + (fault ? 'fault' : moving ? 'moving' : 'idle');
+    el.textContent = fault ? 'ОШИБКА — нажмите «Сбросить ошибку»' : moving ? 'Крутится' : 'Стоит';
+    $('fwd').disabled = $('rev').disabled = moving || fault;
+    $('sensNote').textContent = moving ? 'Опрос датчика приостановлен, пока мотор крутится.'
+                                       : 'Датчик опрашивается только когда мотор стоит.';
+  }
+
+  // ---------- обработка кадров ----------
+  function handle(frame) {
+    const cmd = pending[frame.seq];
+    delete pending[frame.seq];
+    const m = frame.msg;
+
+    if (frame.marker === '!') {
+      log('⚡ ' + m, 'ev');
+      if (m === 'MOTOR DONE') { $('progBar').style.width = '100%'; $('progPct').textContent = '100'; setState('IDLE'); }
+      else if (m === 'MOTOR STOPPED') setState('IDLE');
+      else if (m === 'MOTOR TIMEOUT' || m === 'MOTOR LINK LOST') setState('FAULT');
+      else if (m.startsWith('ARDUINO READY')) { ready = true; send('SPEED_' + $('speed').value); }
+      return;
+    }
+
+    if (m.startsWith('PROGRESS ')) {
+      const p = m.split(' ');                       // PROGRESS STATE done total seq
+      showMotor(p[1], parseInt(p[2], 10) || 0, parseInt(p[3], 10) || 0);
+    } else if (m.startsWith('SENSOR ')) {
+      const p = m.split(' ');
+      if (p.length === 3 && !isNaN(p[1])) {
+        $('temp').textContent = (parseInt(p[1], 10) / 10).toFixed(1);
+        $('hum').textContent = (parseInt(p[2], 10) / 10).toFixed(0);
+      } else if (p[1] === 'ERROR') {
+        $('temp').textContent = $('hum').textContent = '—';
+        $('sensNote').textContent = 'Датчик не отвечает: проверьте провода (− GND, + 5V, out D2).';
+      }
+    } else if (/ STARTED$/.test(m)) {
+      setState('MOVING');
+      log('← ' + m);
+    } else if (m === 'FAULT') {
+      setState('FAULT');
+      log('← FAULT: сначала сбросьте ошибку', 'err');
+    } else if (m === 'BUSY') {
+      log('← BUSY: мотор ещё крутится', 'err');
+    } else if (!QUIET.has(cmd)) {
+      log('← ' + m);
+    }
+  }
+
+  // ---------- периодический опрос ----------
+  function poll() {
+    if (!writer) return;
+    const now = Date.now();
+    if (moving) {
+      send('PROGRESS');
+      if (now - lastKeepalive >= 900) { lastKeepalive = now; send('KEEPALIVE'); }
+    } else {
+      if (now - lastSensor >= 3000) { lastSensor = now; send('SENSOR'); }
+      if (now - lastKeepalive >= 2000) { lastKeepalive = now; send('PROGRESS'); }
+    }
+  }
+
+  // ---------- кнопки ----------
+  document.querySelectorAll('#turns button').forEach((b) => b.onclick = () => {
+    turns = parseInt(b.dataset.t, 10);
+    document.querySelectorAll('#turns button').forEach((x) => x.classList.toggle('sel', x === b));
+  });
+  $('fwd').onclick = async () => { await send('SPEED_' + $('speed').value); lastKeepalive = Date.now(); send('MOVE_FWD_' + turns); };
+  $('rev').onclick = async () => { await send('SPEED_' + $('speed').value); lastKeepalive = Date.now(); send('MOVE_REV_' + turns); };
+  $('stop').onclick = () => send('MOTOR_STOP');
+  $('reset').onclick = () => send('MOTOR_STOP');
+  $('ledOn').onclick = () => send('LED_ON');
+  $('ledOff').onclick = () => send('LED_OFF');
+  $('ping').onclick = () => send('PING');
+  $('status').onclick = () => send('STATUS');
+
+  let speedTimer = 0;
+  $('speed').oninput = (e) => {
+    $('speedVal').textContent = e.target.value;
+    clearTimeout(speedTimer);
+    speedTimer = setTimeout(() => send('SPEED_' + e.target.value), 150);
+  };
+
+  // ---------- чтение ----------
+  async function readLoop() {
+    const decoder = new TextDecoderStream();
+    const closed = port.readable.pipeTo(decoder.writable).catch(() => {});
+    reader = decoder.readable.getReader();
+    let buf = '';
+    try {
+      while (keepReading) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        buf += value;
+        let i;
+        while ((i = buf.indexOf('\n')) >= 0) {
+          const line = buf.slice(0, i).trim();
+          buf = buf.slice(i + 1);
+          if (!line) continue;
+          const frame = parseFrame(line);
+          if (frame) handle(frame);
+          else log('← ?? ' + line, 'err');
+        }
+      }
+    } catch (e) {
+      if (keepReading) log('Ошибка чтения: ' + e.message, 'err');
+    } finally {
+      try { reader.releaseLock(); } catch (e) {}
+      await closed;
+    }
+  }
+
+  // ---------- подключение ----------
+  function setConnected(ok) {
+    $('dot').classList.toggle('ok', ok);
+    $('statusText').textContent = ok ? 'Подключено' : 'Не подключено';
+    $('connectBtn').textContent = ok ? 'Отключить' : 'Подключить Arduino';
+    $('connectBtn').classList.toggle('connected', ok);
+    if (!ok) { $('motorState').className = 'state idle'; $('motorState').textContent = 'Ожидание подключения'; }
+  }
+
+  async function connect() {
+    try {
+      port = await navigator.serial.requestPort();
+      await port.open({ baudRate: 9600 });
+      writer = port.writable.getWriter();
+      keepReading = true;
+      setConnected(true);
+      log('Подключено. Uno перезагружается при открытии порта, подождите ~2 с…');
+      readLoop();
+      setState('IDLE');
+      setTimeout(() => { send('PING'); send('PROGRESS'); send('SPEED_' + $('speed').value); }, 2200);
+      pollTimer = setInterval(poll, 500);
+    } catch (e) {
+      log('Не удалось подключиться: ' + e.message, 'err');
+    }
+  }
+
+  async function disconnect() {
+    keepReading = false;
+    clearInterval(pollTimer);
+    try { if (writer) await send('MOTOR_STOP'); } catch (e) {}
+    try { if (reader) await reader.cancel(); } catch (e) {}
+    try { if (writer) { writer.releaseLock(); writer = null; } } catch (e) {}
+    try { if (port) await port.close(); } catch (e) {}
+    port = null; moving = false;
+    setConnected(false);
+    log('Отключено');
+  }
+
+  $('connectBtn').onclick = () => (port ? disconnect() : connect());
+  setState('IDLE');
+  $('motorState').textContent = 'Ожидание подключения';
+</script>
+</body>
+</html>
