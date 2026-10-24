@@ -28,6 +28,9 @@
   .links a:hover { border-color: var(--accent); transform: translateY(-2px); }
   .links b { display: block; font-size: 19px; margin-bottom: 4px; }
   .links span { color: var(--muted); font-size: 15px; }
+  .mail { display: inline-block; margin-top: 8px; background: var(--accent); color: var(--text); text-decoration: none;
+    padding: 14px 26px; border-radius: 14px; font-weight: 600; font-size: 18px; }
+  .mail:hover { filter: brightness(1.1); }
   ul { margin: 0; padding-left: 22px; }
   li { margin: 6px 0; }
   @media (max-width: 600px) { header { padding: 16px; } main { padding: 18px 14px 40px; } .hello { font-size: 32px; } }
@@ -67,7 +70,16 @@
   </section>
 
   <section class="card">
+    <h2>Нужна помощь с проектом</h2>
+    <p>Я буду рад помощи с моим проектом Arduino Control. Если вы разбираетесь в Arduino, электронике или веб-страницах
+      и хотите подсказать, как улучшить схему, код или интерфейс, напишите мне.</p>
+    <p class="muted">Буду благодарен за советы, исправления ошибок и идеи для новых функций.</p>
+    <a class="mail" href="mailto:trettimtop@gmail.com?subject=Помощь%20с%20проектом%20Arduino%20Control">Написать на почту</a>
+  </section>
+
+  <section class="card">
     <h2>Контакты</h2>
+    <p>Электронная почта: <a style="color:var(--accent)" href="mailto:trettimtop@gmail.com">trettimtop@gmail.com</a></p>
     <p class="muted">GitHub: <a style="color:var(--accent)" href="https://github.com/Timtop-101">Timtop-101</a></p>
   </section>
 </main>
