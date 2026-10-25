@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Как начать — T1mk6 Arduino Control</title>
+<style>
+  :root { --bg: #0f1420; --card: #1a2233; --card2: #222c42; --text: #e8edf7; --muted: #8a96b0; --accent: #3b82f6; --on: #22c55e; --warn: #f59e0b; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif; line-height: 1.6; }
+  main { max-width: 900px; margin: 0 auto; padding: 28px 24px 70px; }
+  h1 { font-size: 38px; margin: 10px 0 8px; }
+  .lead { color: var(--muted); font-size: 19px; margin: 0 0 26px; }
+  .card { background: var(--card); border: 1px solid #2a3550; border-radius: 20px; padding: 26px; margin-bottom: 22px; }
+  .card h2 { margin: 0 0 14px; font-size: 24px; display: flex; align-items: center; gap: 14px; }
+  .num { flex: none; width: 40px; height: 40px; border-radius: 50%; background: var(--accent); display: grid; place-items: center; font-weight: 800; font-size: 20px; }
+  ul, ol { margin: 8px 0 0; padding-left: 24px; }
+  li { margin: 7px 0; }
+  a { color: var(--accent); }
+  code { background: var(--card2); padding: 2px 8px; border-radius: 6px; font-size: 15px; }
+  .btns { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 14px; }
+  .btn { display: inline-block; background: var(--card2); border: 2px solid #34415f; color: var(--text); text-decoration: none;
+    padding: 12px 20px; border-radius: 14px; font-weight: 600; font-size: 16px; }
+  .btn:hover { border-color: var(--accent); }
+  .btn.primary { background: var(--accent); border-color: var(--accent); }
+  .note { background: #2b2113; border: 1px solid #6b4a12; color: #fcd68a; border-radius: 14px; padding: 14px 18px; margin-top: 14px; font-size: 16px; }
+  .trouble dt { font-weight: 700; margin-top: 14px; }
+  .trouble dd { margin: 4px 0 0; color: var(--muted); }
+  table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+  td, th { text-align: left; padding: 9px 10px; border-bottom: 1px solid #2a3550; font-size: 16px; }
+  th { color: var(--muted); font-weight: 600; }
+  @media (max-width: 600px) { main { padding: 18px 14px 50px; } h1 { font-size: 30px; } }
+</style>
+</head>
+<body>
+<script src="nav.js"></script>
+
+<main>
+  <h1>Как начать</h1>
+  <p class="lead">От покупки деталей до первого запуска: шаг за шагом. Хотите просто посмотреть, как это работает? Попробуйте демо, плата не нужна.</p>
+  <div class="btns" style="margin:0 0 26px">
+    <a class="btn primary" href="motor.html?demo=1">Демо: мотор и датчик</a>
+    <a class="btn" href="uno.html?demo=1">Демо: пины Uno</a>
+  </div>
+
+  <section class="card">
+    <h2><span class="num">1</span>Что понадобится</h2>
+    <table>
+      <tr><th>Деталь</th><th>Для чего</th></tr>
+      <tr><td>Arduino Uno и USB-кабель</td><td>основа всего проекта</td></tr>
+      <tr><td>Светодиоды и резисторы 220 Ом</td><td>страница «Uno: пины»</td></tr>
+      <tr><td>Серво (например, SG90), потенциометр</td><td>страница «Uno: пины»</td></tr>
+      <tr><td>Мотор 28BYJ-48 с платой ULN2003</td><td>страница «Мотор и датчик»</td></tr>
+      <tr><td>Датчик DHT11</td><td>температура и влажность</td></tr>
+      <tr><td>Провода, макетная плата</td><td>соединения</td></tr>
+    </table>
+    <div class="note">Не подключайте и не отключайте провода, когда питание включено. Если проект делаете впервые, попросите взрослого проверить схему.</div>
+  </section>
+
+  <section class="card">
+    <h2><span class="num">2</span>Установите Arduino IDE</h2>
+    <p>Скачайте программу с официального сайта и установите.</p>
+    <div class="btns"><a class="btn" href="https://www.arduino.cc/en/software" target="_blank" rel="noopener">Скачать Arduino IDE</a></div>
+    <ul>
+      <li>Для скетча мотора нужна библиотека <b>DHT sensor library</b> (Adafruit): меню <i>Скетч → Подключить библиотеку → Управлять библиотеками</i>, найдите её и нажмите «Установить» (согласитесь поставить зависимости, например Adafruit Unified Sensor).</li>
+      <li>Для скетча Uno нужна библиотека <code>Servo</code>, она уже встроена.</li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <h2><span class="num">3</span>Подключите детали</h2>
+    <p>Схемы подключения есть на страницах сайта: светодиоды, серво и потенциометр, а также мотор и датчик.</p>
+    <div class="btns">
+      <a class="btn" href="uno.html#wiring">Схема: светодиоды, серво, A0</a>
+      <a class="btn" href="motor.html">Схема: мотор и датчик</a>
+      <a class="btn" href="schemes/A000066-full-pinout.pdf">Распиновка Uno (PDF)</a>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2><span class="num">4</span>Загрузите скетч на плату</h2>
+    <p>Скачайте нужный скетч и откройте его в Arduino IDE.</p>
+    <div class="btns">
+      <a class="btn" href="arduino_control/arduino_control.ino" download>Скетч Uno: пины, ШИМ, серво</a>
+      <a class="btn" href="arduino_control/Arduino_Motor_Bridge_DHT11_TEST_FIX.ino" download>Скетч: мотор и DHT11</a>
+    </div>
+    <ol>
+      <li>Подключите Uno к компьютеру USB-кабелем.</li>
+      <li>В меню <i>Инструменты → Плата</i> выберите <b>Arduino Uno</b>, в <i>Порт</i> выберите порт платы.</li>
+      <li>Нажмите кнопку «Загрузить» (стрелка вправо) и дождитесь «Загрузка завершена».</li>
+      <li><b>Закройте Монитор порта</b> в Arduino IDE, иначе браузер не сможет открыть порт.</li>
+    </ol>
+    <div class="note">Файл скетча должен лежать в папке с тем же именем (IDE предложит создать её сама).</div>
+  </section>
+
+  <section class="card">
+    <h2><span class="num">5</span>Откройте сайт и подключитесь</h2>
+    <ol>
+      <li>Откройте сайт в <b>Chrome или Edge на компьютере</b> (Web Serial работает не везде, на телефонах он не работает).</li>
+      <li>Выберите страницу: <a href="uno.html">Uno: пины</a> или <a href="motor.html">Мотор и датчик</a>.</li>
+      <li>Нажмите «Подключить Arduino» и выберите порт в окне браузера.</li>
+      <li>Подождите около 2 секунд: Uno перезагружается при открытии порта.</li>
+    </ol>
+    <div class="note">Первый запуск мотора делайте на 1 оборот и небольшой скорости, чтобы проверить направление и подключение.</div>
+  </section>
+
+  <section class="card">
+    <h2>Если что-то не получается</h2>
+    <dl class="trouble">
+      <dt>Порт не открывается или занят</dt>
+      <dd>Закройте Монитор порта в Arduino IDE и другие программы, которые используют плату. Отключите и снова подключите кабель.</dd>
+      <dt>В списке нет порта</dt>
+      <dd>Попробуйте другой USB-кабель (бывают только для зарядки). У китайских копий Uno с чипом CH340 нужен драйвер.</dd>
+      <dt>Сообщение про Web Serial</dt>
+      <dd>Откройте сайт в Chrome или Edge на компьютере.</dd>
+      <dt>Мотор не крутится или дёргается</dt>
+      <dd>Проверьте порядок проводов IN1–IN4 (D8–D11) и общее питание: «−» источника должен быть соединён с GND Arduino.</dd>
+      <dt>Датчик показывает ошибку</dt>
+      <dd>Проверьте провода: «−» на GND, «+» на 5V, «out» на D2. Датчик опрашивается только когда мотор стоит.</dd>
+    </dl>
+    <p>Не нашли решение? Нажмите «⚠ Сообщить о проблеме» в меню сверху, и я постараюсь помочь.</p>
+  </section>
+</main>
+</body>
+</html>

@@ -27,6 +27,12 @@
   button:disabled { opacity: .4; cursor: not-allowed; }
   .connect { background: var(--accent); font-size: 20px; font-weight: 600; padding: 14px 28px; }
   .connect.connected { background: var(--danger); }
+  .conn-btns { display: flex; gap: 12px; flex-wrap: wrap; }
+  .demo-btn { background: var(--card2); border: 2px solid #34415f; font-size: 18px; font-weight: 600; padding: 12px 22px; }
+  .demo-btn:hover { border-color: var(--accent); }
+  .hist-wrap canvas { width: 100%; height: 320px; background: var(--card2); border-radius: 12px; display: block; }
+  .legend { display: flex; gap: 22px; flex-wrap: wrap; margin-top: 12px; font-size: 16px; color: var(--muted); }
+  .legend i { display: inline-block; width: 14px; height: 14px; border-radius: 4px; margin-right: 8px; vertical-align: -2px; }
   main { max-width: 1300px; margin: 0 auto; padding: 24px; display: grid; gap: 24px;
     grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); }
   .card { background: var(--card); border-radius: 20px; padding: 24px; border: 1px solid #2a3550; }
@@ -62,13 +68,18 @@
 </style>
 </head>
 <body>
+<script src="nav.js"></script>
+<script src="demo-serial.js"></script>
 
 <div class="warn" id="warn">Ваш браузер не поддерживает Web Serial. Откройте страницу в Chrome или Edge на компьютере.</div>
 
 <header>
   <h1><a class="home-link" href="about.html" title="Обо мне">T1mk6 <span>Arduino Control</span></a></h1>
   <div class="status"><div class="dot" id="dot"></div><span id="statusText">Не подключено</span></div>
-  <button class="connect" id="connectBtn">Подключить Arduino</button>
+  <div class="conn-btns">
+    <button class="demo-btn" id="demoBtn" title="Попробовать страницу без платы">Демо без платы</button>
+    <button class="connect" id="connectBtn">Подключить Arduino</button>
+  </div>
 </header>
 
 <main>
@@ -194,6 +205,17 @@
     </div>
   </section>
 
+  <section class="card wide hist-wrap">
+    <h2>История температуры и влажности</h2>
+    <canvas id="histChart"></canvas>
+    <div class="legend"><span><i style="background:#f59e0b"></i>температура, °C (слева)</span><span><i style="background:#38bdf8"></i>влажность, % (справа)</span></div>
+    <div class="row" style="margin-top:16px">
+      <button id="csvBtn">Скачать CSV</button>
+      <button id="clearHist">Очистить историю</button>
+    </div>
+    <div class="hint" id="histNote">Измерений: 0. Данные хранятся, пока страница открыта.</div>
+  </section>
+
   <section class="card wide">
     <h2>Журнал</h2>
     <div class="log" id="log"></div>
@@ -304,6 +326,7 @@
       if (p.length === 3 && !isNaN(p[1])) {
         $('temp').textContent = (parseInt(p[1], 10) / 10).toFixed(1);
         $('hum').textContent = (parseInt(p[2], 10) / 10).toFixed(0);
+        logSensor(parseInt(p[1], 10) / 10, parseInt(p[2], 10) / 10);
       } else if (p[1] === 'ERROR') {
         $('temp').textContent = $('hum').textContent = '—';
         $('sensNote').textContent = 'Датчик не отвечает: проверьте провода (− GND, + 5V, out D2).';
@@ -387,20 +410,25 @@
   // ---------- подключение ----------
   function setConnected(ok) {
     $('dot').classList.toggle('ok', ok);
-    $('statusText').textContent = ok ? 'Подключено' : 'Не подключено';
+    $('statusText').textContent = ok ? (demoMode ? 'Демо-режим (без платы)' : 'Подключено') : 'Не подключено';
+    $('demoBtn').style.display = ok ? 'none' : '';
     $('connectBtn').textContent = ok ? 'Отключить' : 'Подключить Arduino';
     $('connectBtn').classList.toggle('connected', ok);
     if (!ok) { $('motorState').className = 'state idle'; $('motorState').textContent = 'Ожидание подключения'; }
   }
 
-  async function connect() {
+  let demoMode = false;
+
+  async function connect(demo) {
     try {
-      port = await navigator.serial.requestPort();
+      demoMode = demo === true;
+      port = demoMode ? DemoSerial.motor() : await navigator.serial.requestPort();
       await port.open({ baudRate: 9600 });
       writer = port.writable.getWriter();
       keepReading = true;
       setConnected(true);
-      log('Подключено. Uno перезагружается при открытии порта, подождите ~2 с…');
+      log(demoMode ? 'Демо-режим: это имитация, настоящая плата не нужна.'
+                   : 'Подключено. Uno перезагружается при открытии порта, подождите ~2 с…');
       readLoop();
       setState('IDLE');
       setTimeout(() => { send('PING'); send('PROGRESS'); send('SPEED_' + $('speed').value); }, 2200);
@@ -423,8 +451,90 @@
   }
 
   $('connectBtn').onclick = () => (port ? disconnect() : connect());
+  $('demoBtn').onclick = () => connect(true);
   setState('IDLE');
   $('motorState').textContent = 'Ожидание подключения';
+
+  // ---------- история датчика и CSV ----------
+  const sensorLog = [];
+  function logSensor(t, h) {
+    sensorLog.push({ ts: Date.now(), t: t, h: h });
+    if (sensorLog.length > 2000) sensorLog.shift();
+    drawHist();
+  }
+
+  function niceRange(min, max, minSpan) {
+    let lo = Math.floor(min - 0.5), hi = Math.ceil(max + 0.5);
+    if (hi - lo < minSpan) { const mid = (hi + lo) / 2; lo = Math.floor(mid - minSpan / 2); hi = lo + minSpan; }
+    return [lo, hi];
+  }
+
+  function drawHist() {
+    const c = $('histChart');
+    const w = c.clientWidth, h = c.clientHeight;
+    if (!w || !h) return;
+    const dpr = window.devicePixelRatio || 1;
+    c.width = Math.round(w * dpr); c.height = Math.round(h * dpr);
+    const g = c.getContext('2d');
+    g.scale(dpr, dpr);
+    g.clearRect(0, 0, w, h);
+    $('histNote').textContent = 'Измерений: ' + sensorLog.length + '. Данные хранятся, пока страница открыта.';
+    const L = 56, R = 56, T = 18, B = 36;
+    const pw = w - L - R, ph = h - T - B;
+    g.font = '13px system-ui, Arial'; g.lineWidth = 1;
+    for (let i = 0; i <= 4; i++) {
+      const y = T + ph * i / 4;
+      g.strokeStyle = 'rgba(255,255,255,.08)'; g.beginPath(); g.moveTo(L, y); g.lineTo(w - R, y); g.stroke();
+    }
+    if (sensorLog.length < 2) {
+      g.fillStyle = '#8a96b0'; g.textAlign = 'center';
+      g.fillText('Нужно хотя бы 2 измерения (датчик опрашивается каждые 3 с, когда мотор стоит)', w / 2, h / 2);
+      return;
+    }
+    const ts = sensorLog.map((r) => r.ts), t0 = ts[0], t1 = ts[ts.length - 1] || t0 + 1;
+    const [tl, th] = niceRange(Math.min(...sensorLog.map((r) => r.t)), Math.max(...sensorLog.map((r) => r.t)), 4);
+    const [hl, hh] = niceRange(Math.min(...sensorLog.map((r) => r.h)), Math.max(...sensorLog.map((r) => r.h)), 10);
+    const X = (ts_) => L + (t1 === t0 ? 0 : (ts_ - t0) / (t1 - t0)) * pw;
+    const Y = (v, lo, hi) => T + ph - (v - lo) / (hi - lo) * ph;
+    for (let i = 0; i <= 4; i++) {
+      const y = T + ph * i / 4;
+      g.fillStyle = '#f59e0b'; g.textAlign = 'right'; g.fillText((th - (th - tl) * i / 4).toFixed(1), L - 8, y + 4);
+      g.fillStyle = '#38bdf8'; g.textAlign = 'left'; g.fillText((hh - (hh - hl) * i / 4).toFixed(0), w - R + 8, y + 4);
+    }
+    const line = (key, lo, hi, color) => {
+      g.strokeStyle = color; g.lineWidth = 3; g.lineJoin = 'round'; g.beginPath();
+      sensorLog.forEach((r, i) => { const x = X(r.ts), y = Y(r[key], lo, hi); if (i === 0) g.moveTo(x, y); else g.lineTo(x, y); });
+      g.stroke();
+    };
+    line('t', tl, th, '#f59e0b');
+    line('h', hl, hh, '#38bdf8');
+    g.fillStyle = '#8a96b0'; g.textAlign = 'left'; g.fillText(new Date(t0).toLocaleTimeString(), L, h - 10);
+    g.textAlign = 'right'; g.fillText(new Date(t1).toLocaleTimeString(), w - R, h - 10);
+  }
+
+  function localStamp(ms) {
+    const d = new Date(ms), p = (n) => String(n).padStart(2, '0');
+    return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()) + ' ' + p(d.getHours()) + ':' + p(d.getMinutes()) + ':' + p(d.getSeconds());
+  }
+
+  $('csvBtn').onclick = () => {
+    if (!sensorLog.length) { log('Для CSV пока нет измерений', 'err'); return; }
+    const rows = ['время;температура_C;влажность_%'].concat(
+      sensorLog.map((r) => localStamp(r.ts) + ';' + r.t.toFixed(1) + ';' + r.h.toFixed(0)));
+    const blob = new Blob(['﻿' + rows.join('\r\n')], { type: 'text/csv;charset=utf-8' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'dht11_' + localStamp(Date.now()).replace(/[: ]/g, '-') + '.csv';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+    log('CSV сохранён: ' + sensorLog.length + ' строк');
+  };
+  $('clearHist').onclick = () => { sensorLog.length = 0; drawHist(); log('История очищена'); };
+  window.addEventListener('resize', drawHist);
+  drawHist();
+
+  // ?demo=1 — сразу запустить демо-режим (ссылки с главной страницы)
+  if (new URLSearchParams(location.search).get('demo') === '1') connect(true);
 </script>
 </body>
 </html>
