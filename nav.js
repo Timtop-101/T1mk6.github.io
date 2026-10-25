@@ -7,6 +7,7 @@
     ['uno.html', 'Uno: пины'],
     ['motor.html', 'Мотор и датчик'],
     ['start.html', 'Как начать'],
+    ['update.html', 'Что нового 2.0'],
     ['about.html', 'Обо мне']
   ];
   var cur = location.pathname.split('/').pop() || 'index.html';

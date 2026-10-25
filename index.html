@@ -10,6 +10,9 @@
   body { margin: 0; background: var(--bg); color: var(--text);
     font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif; line-height: 1.5; }
   .hero { max-width: 1000px; margin: 0 auto; padding: 60px 24px 30px; text-align: center; }
+  .whatsnew { display: inline-block; margin-bottom: 22px; background: #12351f; color: #5ee08a; text-decoration: none;
+    padding: 8px 18px; border-radius: 22px; font-weight: 700; font-size: 15px; border: 1px solid #1f6b3a; }
+  .whatsnew:hover { background: #17432a; }
   .hero h1 { font-size: 56px; line-height: 1.08; margin: 0 0 18px; font-weight: 800; letter-spacing: -1px; }
   .hero h1 span { color: var(--accent); }
   .hero p { font-size: 22px; color: var(--muted); margin: 0 auto 30px; max-width: 640px; }
@@ -36,6 +39,7 @@
 <script src="nav.js"></script>
 
 <section class="hero">
+  <a class="whatsnew" href="update.html">ОБНОВЛЕНИЕ 2.0 · что нового →</a>
   <h1>Управляй <span>Arduino</span><br>прямо из браузера</h1>
   <p>Кнопки, ползунки, шаговый мотор и датчик температуры на одной странице. Бесплатно и без установки приложений.</p>
   <div class="chips"><span class="chip">USB</span><span class="chip">Бесплатно</span><span class="chip">Есть демо без платы</span></div>
