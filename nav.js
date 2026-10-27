@@ -20,6 +20,8 @@
     '.sitenav a:hover{background:#1a2233}' +
     '.sitenav a.cur{background:#3b82f6;color:#fff}' +
     '.sitenav .sp{flex:1}' +
+    '.sitenav a.install{background:#12351f;color:#5ee08a;border:1px solid #1f6b3a}' +
+    '.sitenav a.install:hover{background:#17432a}' +
     '.sitenav a.report{background:#2b2113;color:#fbbf24;border:1px solid #6b4a12}' +
     '.sitenav a.report:hover{background:#3a2c15}' +
     '@media (max-width:640px){.sitenav{overflow-x:auto;flex-wrap:nowrap}.sitenav .sp{display:none}}';
@@ -36,6 +38,41 @@
     if (p[0] === cur) a.className = 'cur';
     nav.appendChild(a);
   });
+
+  // ---------- установка как приложение (PWA) ----------
+  var deferredPrompt = null;
+  var standalone = (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || window.navigator.standalone === true;
+
+  var inst = document.createElement('a');
+  inst.className = 'install';
+  inst.href = '#';
+  inst.textContent = 'Установить приложение';
+  inst.style.display = 'none';
+  nav.appendChild(inst);
+
+  // true — системное окно установки показано; false — такой возможности сейчас нет
+  window.installApp = function () {
+    if (!deferredPrompt) return false;
+    var p = deferredPrompt;
+    deferredPrompt = null;
+    inst.style.display = 'none';
+    p.prompt();
+    return true;
+  };
+  inst.addEventListener('click', function (e) { e.preventDefault(); window.installApp(); });
+
+  window.addEventListener('beforeinstallprompt', function (e) {
+    e.preventDefault();
+    deferredPrompt = e;
+    if (!standalone) inst.style.display = '';
+  });
+  window.addEventListener('appinstalled', function () { deferredPrompt = null; inst.style.display = 'none'; });
+
+  if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
+    window.addEventListener('load', function () {
+      navigator.serviceWorker.register('sw.js').catch(function () {});
+    });
+  }
 
   var sp = document.createElement('span');
   sp.className = 'sp';

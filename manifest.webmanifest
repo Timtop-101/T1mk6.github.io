@@ -1,0 +1,22 @@
+{
+  "name": "T1mk6 Arduino Control",
+  "short_name": "Arduino Control",
+  "description": "Управление Arduino из браузера: пины, мотор 28BYJ-48, датчик DHT11, демо без платы.",
+  "lang": "ru",
+  "id": "./",
+  "start_url": "index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0f1420",
+  "theme_color": "#0f1420",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Мотор и датчик", "url": "motor.html" },
+    { "name": "Uno: пины", "url": "uno.html" },
+    { "name": "Демо без платы", "url": "motor.html?demo=1" }
+  ]
+}
