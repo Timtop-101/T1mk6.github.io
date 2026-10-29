@@ -1,9 +1,124 @@
-<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#101116"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><title>Mini Store AI — игровая касса</title><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg" type="image/svg+xml"><style>
-:root{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#f9f9fd;background:#101116}*{box-sizing:border-box}body{margin:0;min-height:100vh}button,input,textarea{font:inherit}button{cursor:pointer;border:0}header{position:sticky;top:0;z-index:4;background:#101116eF;backdrop-filter:blur(15px);padding:calc(env(safe-area-inset-top) + 15px) 20px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #272832}.brand{font-weight:800;font-size:22px;letter-spacing:-.7px}.brand span{color:#9aa7ff}.mini{font-size:12px;color:#a4a6b5}main{max-width:900px;margin:auto;padding:20px 18px 115px}.tabs{position:fixed;z-index:6;bottom:0;left:0;right:0;background:#1a1b22ee;backdrop-filter:blur(20px);display:flex;justify-content:space-around;padding:12px 10px calc(11px + env(safe-area-inset-bottom));border-top:1px solid #34343f}.tab{color:#a8a9ba;background:none;display:grid;gap:5px;justify-items:center;font-size:12px;min-width:53px}.tab b{font-size:23px}.tab.active{color:#9caaff}h1{font-size:31px;line-height:1.1;margin:7px 0 8px;letter-spacing:-1.2px}p{color:#aaacbb;line-height:1.5}.panel{background:#1d1e27;border:1px solid #30313f;border-radius:24px;padding:20px;margin:17px 0}.cameraWrap{position:relative;background:#08090c;border-radius:20px;overflow:hidden;aspect-ratio:4/3;display:grid;place-items:center;border:1px solid #393a44}video{width:100%;height:100%;object-fit:cover;position:absolute;inset:0}.cameraPlaceholder{text-align:center;color:#9fa1b0;padding:25px}.cameraPlaceholder b{display:block;font-size:48px;margin-bottom:10px}.target{position:absolute;z-index:1;width:62%;height:63%;border:2px solid #b5c3ff;border-radius:22px;box-shadow:0 0 0 999px #0003;pointer-events:none}.cameraLabel{position:absolute;z-index:1;bottom:12px;background:#111b;padding:8px 12px;border-radius:30px;color:white;font-size:12px}.btn{padding:15px 18px;border-radius:16px;background:#8b9dff;color:#0c133a;font-weight:750}.btn.secondary{background:#343644;color:#f5f5fc}.btn:disabled{opacity:.5}.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}.actions>*{flex:1}.hint{font-size:13px;color:#9b9eaf}.result{background:#26324a;border-radius:18px;padding:17px;margin-top:15px}.result strong{font-size:20px}.price{font-size:26px;font-weight:800;margin:7px 0;color:#b9c6ff}.row{display:flex;align-items:center;justify-content:space-between;gap:14px}.search{width:100%;border-radius:16px;background:#252630;color:#fff;padding:15px;border:1px solid #383947;outline:0}.products{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px;margin-top:15px}.product{padding:15px;border-radius:19px;background:#1f202a;border:1px solid #313341;display:flex;flex-direction:column;gap:11px}.product h3{margin:0;font-size:16px}.product small{color:#aaaabc}.product .row b{font-size:17px}.product button{border-radius:12px;padding:9px 11px;background:#3b4265;color:#fff;font-weight:700}.item{padding:13px 0;border-bottom:1px solid #343541}.qty{display:flex;align-items:center;gap:12px}.qty button{width:32px;height:32px;border-radius:11px;background:#3a3d51;color:#fff;font-size:19px}.total{font-size:34px;font-weight:850;letter-spacing:-1px}.field{width:100%;padding:15px;border:1px solid #4a4c5d;border-radius:15px;background:#262735;color:white;font-size:19px}.notice{border-radius:14px;padding:13px;background:#353047;color:#e0d6fa;margin-top:12px}.success{background:#243d35;color:#b3edc8}.hidden{display:none!important}select{padding:12px;background:#2c2e3a;color:#fff;border:1px solid #494a56;border-radius:13px;max-width:100%}.learn{display:grid;gap:12px}.tag{padding:6px 9px;border-radius:9px;background:#31364d;color:#c3ccff;font-size:11px}.photo{width:65px;height:65px;object-fit:cover;border-radius:12px;background:#333}.foot{font-size:12px;color:#818494;margin-top:30px}input[type=file]{display:none}.chatlog{display:flex;flex-direction:column;gap:12px;max-height:47vh;min-height:220px;overflow:auto;padding:7px 2px 13px}.bubble{max-width:90%;padding:12px 14px;border-radius:18px;background:#303241;line-height:1.5;white-space:pre-wrap;overflow-wrap:anywhere}.bubble.me{align-self:flex-end;background:#3d4b7c}.bubble.ai{align-self:flex-start}.chatbar{display:flex;gap:8px}.chatbar .field{min-width:0;font-size:16px}.smallbtn{background:#353950;color:white;padding:12px;border-radius:14px;white-space:nowrap}.settingsrow{display:flex;align-items:center;gap:8px;justify-content:space-between}.status{font-size:12px;color:#c2cadc}.status.ok{color:#a2ebbd}.suggestions{display:flex;flex-wrap:wrap;gap:7px;margin:10px 0}.suggestions button{padding:8px 12px;border-radius:30px;background:#343848;color:#e7e9fb}.loading{opacity:.7;pointer-events:none}
-</style></head><body><header><div><div class="brand">Mini<span>Store</span> <span style="font-size:17px"></span></div><div class="mini">Игровой магазин · iPhone & iPad</div></div><div id="count" class="tag">Корзина: 0</div></header><main>
-<section id="scanPage"><h1>ИИ-сканер коробок 📷</h1><p>Наведи камеру на коробку. ИИ распознаёт модель по фотографии при подключении к серверу. Без него работает сравнение с фотографиями из «Обучения».</p><div class="panel"><div class="cameraWrap"><video id="video" autoplay muted playsinline></video><div id="cameraPlaceholder" class="cameraPlaceholder"><b>📦</b>Нажми «Включить камеру»<br><small>или выбери фото коробки</small></div><div class="target"></div><div class="cameraLabel">Помести коробку в рамку</div></div><div class="actions"><button id="startCam" class="btn secondary">Включить камеру</button><button id="snap" class="btn" disabled>🤖 Распознать</button></div><div class="actions"><button id="uploadScan" class="btn secondary">Выбрать фото из галереи</button></div><input id="scanFile" type="file" accept="image/*" capture="environment"><div id="scanMessage" class="hint" style="margin-top:10px">Для камеры нужен HTTPS или локальная страница.</div><div id="scanResult" class="hidden result"><div class="hint" id="confidence"></div><strong id="matchName"></strong><div class="price" id="matchPrice"></div><button id="addMatch" class="btn">Добавить в корзину</button><button id="otherMatch" class="btn secondary">Выбрать вручную</button></div></div></section>
-<section id="catalogPage" class="hidden"><h1>Товары 📱</h1><p>Все цены из твоего прайс-листа.</p><input class="search" id="search" placeholder="Поиск товара"><div class="products" id="products"></div></section>
-<section id="aiPage" class="hidden"><h1>ИИ-помощник 🤖</h1><p>Спроси про товары, цены и попроси собрать покупку. Команды работают даже без интернета.</p><div class="panel"><div id="aiStatus" class="status">Режим: локальный помощник</div><div id="chatLog" class="chatlog" aria-live="polite"></div><div class="suggestions"><button data-prompt="Какой iPhone самый дешёвый?">Дешёвый iPhone</button><button data-prompt="Покажи AirPods">Цены AirPods</button><button data-prompt="Добавь iPhone 13 pink в корзину">Добавить товар</button><button data-prompt="Сколько в корзине и какая сдача?">Моя касса</button></div><div class="chatbar"><input id="chatInput" class="field" placeholder="Например: добавь AirPods Pro" aria-label="Сообщение помощнику"><button id="mic" class="smallbtn" title="Голосовой ввод">🎙️</button><button id="sendChat" class="btn">➤</button></div><div class="actions"><button id="speakToggle" class="btn secondary">🔈 Ответы голосом: выкл</button><button id="openSettings" class="btn secondary">⚙️ Подключение ИИ</button></div><div id="settings" class="hidden"><p class="hint">Для облачного ИИ введи адрес <b>своего защищённого сервера</b> (HTTPS). Не вводи сюда ключ API! Пример сервера находится в архиве.</p><input id="apiEndpoint" class="field" type="url" placeholder="https://your-worker.workers.dev" autocomplete="url" spellcheck="false"><div class="actions"><button id="saveEndpoint" class="btn">Сохранить адрес</button><button id="removeEndpoint" class="btn secondary">Без сервера</button></div></div></div></section>
-<section id="cartPage" class="hidden"><h1>Корзина 🛍️</h1><div class="panel"><div id="cartItems"></div><p>К оплате</p><div class="total" id="total">0 ₽</div><div style="margin-top:22px"><label for="cash">Покупатель дал (₽)</label><input id="cash" class="field" style="margin-top:7px" type="number" min="0" inputmode="numeric" placeholder="Например, 20000"></div><div class="actions"><button id="smartPay" class="btn secondary">✨ Умная касса: рассчитать</button><button id="cashVoice" class="btn secondary">🎙️ Назвать сумму</button></div><div id="change" class="notice">Введи сумму оплаты, чтобы посчитать сдачу.</div><div class="actions"><button id="checkout" class="btn">Оплатить</button><button id="clearCart" class="btn secondary">Очистить</button></div></div></section>
-<section id="learnPage" class="hidden"><h1>Обучение 📦</h1><p>Сфотографируй <b>каждую коробку отдельно</b> при хорошем свете. Можно добавить несколько фото одной коробки под разными углами. Снимки сохраняются только на этом устройстве.</p><div class="panel learn"><label for="learnSelect">Выбери модель</label><select id="learnSelect"></select><button id="learnButton" class="btn">Добавить фото коробки</button><input id="learnFile" type="file" accept="image/*" capture="environment"><div id="learnNote" class="hint"></div><div id="trained"></div><button id="resetTraining" class="btn secondary">Удалить все образцы</button></div><p class="hint">Важно: это простое локальное сравнение изображений, а не полноценная нейросеть. Похожие коробки, разные ракурсы и освещение могут мешать распознаванию. Всегда проверяй модель перед оплатой.</p></section>
-<div class="foot">Неофициальное приложение для игры. Не связано с Apple. Все цены — игровые.</div></main><nav class="tabs"><button class="tab active" data-page="scan"><b>⌗</b>Сканер</button><button class="tab" data-page="catalog"><b>▦</b>Каталог</button><button class="tab" data-page="cart"><b>🛒</b>Корзина</button><button class="tab" data-page="ai"><b>🤖</b>ИИ</button><button class="tab" data-page="learn"><b>✦</b>Обучение</button></nav><script src="app.js"></script></body></html>
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Mini Store">
+<meta name="format-detection" content="telephone=no">
+<title>Mini Store — игровая касса</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main>
+
+<!-- СКАНЕР -->
+<section id="page-scan">
+  <div class="top"><div><div class="eyebrow">MINI STORE</div><h1>Сканер</h1></div><span class="badge" id="trainedBadge">0 из 16</span></div>
+  <p class="lead">Наведи камеру на коробку. Приложение сравнит её с фото из раздела «Обучение». Всё считается прямо на телефоне, бесплатно и без интернета.</p>
+  <div class="card">
+    <div class="cam off" id="scanCam"><video id="scanVideo" autoplay muted playsinline></video><div class="ph" id="scanPh"><b>📦</b>Включи камеру или выбери фото</div><div class="frame"></div><div class="tip">Коробка в рамке, хороший свет</div></div>
+    <div class="actions">
+      <button class="btn gray" id="scanStart">Включить камеру</button>
+      <button class="btn" id="scanSnap" disabled>Распознать</button>
+    </div>
+    <div class="actions"><button class="btn gray" id="scanFileBtn">Снять или выбрать фото</button></div>
+    <input type="file" id="scanFile" accept="image/*" capture="environment">
+    <div class="msg" id="scanMsg">Если камера не открывается, нажми «Снять или выбрать фото» или выбери товар вручную.</div>
+  </div>
+  <div class="card hidden" id="scanResult">
+    <h2 id="scanTitle">Похоже на…</h2>
+    <div id="scanList"></div>
+    <div class="actions"><button class="btn gray" id="scanManual">Выбрать вручную из каталога</button></div>
+  </div>
+</section>
+
+<!-- КАТАЛОГ -->
+<section id="page-catalog" class="hidden">
+  <div class="top"><div><div class="eyebrow">16 ТОВАРОВ</div><h1>Каталог</h1></div></div>
+  <input class="field search" id="search" type="search" placeholder="Поиск товара" aria-label="Поиск товара" autocomplete="off">
+  <div class="chips scroll" id="cats"></div>
+  <div class="grid" id="products"></div>
+</section>
+
+<!-- КОРЗИНА / КАССА -->
+<section id="page-cart" class="hidden">
+  <div class="top"><div><div class="eyebrow">УМНАЯ КАССА</div><h1>Корзина</h1></div></div>
+  <div class="card" id="cartCard">
+    <div id="cartItems"></div>
+    <div class="row" style="margin-top:14px"><span class="sub">К оплате</span><span class="sub" id="cartCount"></span></div>
+    <div class="total" id="total">0 ₽</div>
+  </div>
+  <div class="card" id="payCard">
+    <label class="l" for="cash">Покупатель дал, ₽</label>
+    <div class="composer" style="margin-top:0"><input id="cash" class="field big" type="text" inputmode="numeric" placeholder="0" autocomplete="off"><button class="round" id="cashMic" title="Назвать сумму голосом" aria-label="Назвать сумму голосом">🎙️</button></div>
+    <div class="chips" id="quick" style="margin-top:12px"></div>
+    <div class="change" id="change">Введи сумму, чтобы посчитать сдачу.</div>
+    <div class="actions"><button class="btn" id="checkout">Оплатить</button><button class="btn red" id="clearCart">Очистить</button></div>
+  </div>
+  <div class="card hidden" id="receipt"></div>
+  <div class="card">
+    <details id="historyBox"><summary>История продаж · <span id="todaySum">сегодня 0 ₽</span></summary><div id="history"></div></details>
+  </div>
+</section>
+
+<!-- ПОМОЩНИК -->
+<section id="page-chat" class="hidden">
+  <div class="top"><div><div class="eyebrow">БЕСПЛАТНЫЙ КОНСУЛЬТАНТ</div><h1>Помощник</h1></div></div>
+  <p class="lead">Знает прайс, считает сдачу и собирает корзину по твоим словам. Работает офлайн, без аккаунтов и подписок.</p>
+  <div class="card">
+    <div class="chat" id="chatLog" aria-live="polite"></div>
+    <div class="chips scroll" id="suggest"></div>
+    <div class="composer">
+      <input id="chatInput" class="field" placeholder="Например: добавь AirPods Pro" aria-label="Сообщение" enterkeyhint="send" autocomplete="off">
+      <button class="round" id="mic" title="Голосовой ввод" aria-label="Голосовой ввод">🎙️</button>
+      <button class="round send" id="send" aria-label="Отправить">↑</button>
+    </div>
+    <div class="actions"><button class="btn gray sm" id="speakToggle">🔈 Ответы голосом: выкл</button></div>
+    <div class="msg" id="voiceNote"></div>
+  </div>
+</section>
+
+<!-- ОБУЧЕНИЕ -->
+<section id="page-learn" class="hidden">
+  <div class="top"><div><div class="eyebrow">ЛОКАЛЬНОЕ РАСПОЗНАВАНИЕ</div><h1>Обучение</h1></div></div>
+  <p class="lead">Сфотографируй каждую коробку: 2–3 фото под разными углами при хорошем свете. Фото остаются только на этом устройстве.</p>
+  <div class="card">
+    <div class="row"><b id="learnProgress">Обучено 0 из 16</b><span class="sub" id="learnCount"></span></div>
+    <div class="bar"><i id="learnBar" style="width:0"></i></div>
+    <label class="l" for="learnSelect" style="margin-top:14px">Какая коробка</label>
+    <select id="learnSelect" class="field"></select>
+    <div class="cam off" id="learnCam" style="margin-top:12px"><video id="learnVideo" autoplay muted playsinline></video><div class="ph" id="learnPh"><b>📷</b>Включи камеру или выбери фото</div><div class="frame"></div><div class="tip">Коробка в рамке</div></div>
+    <div class="actions">
+      <button class="btn gray" id="learnStart">Включить камеру</button>
+      <button class="btn" id="learnSnap" disabled>Добавить фото</button>
+    </div>
+    <div class="actions"><button class="btn gray" id="learnFileBtn">Снять или выбрать фото</button></div>
+    <input type="file" id="learnFile" accept="image/*" capture="environment" multiple>
+    <div class="msg" id="learnMsg"></div>
+  </div>
+  <div class="card"><h2>Образцы</h2><div id="trained"></div><div class="actions"><button class="btn red sm" id="resetTraining">Удалить все образцы</button></div></div>
+  <p class="foot">Это простое сравнение изображений на телефоне, а не нейросеть. Похожие коробки (например, два цвета iPhone) можно перепутать, поэтому всегда проверяй результат. Если не уверен, выбери товар вручную в каталоге.</p>
+</section>
+
+<p class="foot">Неофициальное игровое приложение. Не связано с Apple. Все цены игровые.<br>Бесплатно · без сервера · данные хранятся только на этом устройстве.</p>
+</main>
+
+<nav class="tabs" aria-label="Разделы">
+  <button class="tab on" data-page="scan"><svg viewBox="0 0 24 24"><path d="M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2"/><circle cx="12" cy="12" r="3.2"/></svg>Сканер</button>
+  <button class="tab" data-page="catalog"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/></svg>Каталог</button>
+  <button class="tab" data-page="cart"><svg viewBox="0 0 24 24"><path d="M3 4h2.5l2 11h10l2-8H7"/><circle cx="9" cy="19" r="1.4"/><circle cx="17" cy="19" r="1.4"/></svg>Корзина<span class="n hidden" id="cartBadge">0</span></button>
+  <button class="tab" data-page="chat"><svg viewBox="0 0 24 24"><path d="M4 6a3 3 0 0 1 3-3h10a3 3 0 0 1 3 3v8a3 3 0 0 1-3 3h-6l-5 4v-4H7a3 3 0 0 1-3-3z"/></svg>Помощник</button>
+  <button class="tab" data-page="learn"><svg viewBox="0 0 24 24"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8zM19 16l.8 2.2L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.2-.8z"/></svg>Обучение</button>
+</nav>
+<div class="toast" id="toast" role="status"></div>
+<script src="app.js"></script>
+</body>
+</html>
