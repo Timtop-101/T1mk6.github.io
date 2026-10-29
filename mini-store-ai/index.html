@@ -104,7 +104,16 @@
     <input type="file" id="learnFile" accept="image/*" capture="environment" multiple>
     <div class="msg" id="learnMsg"></div>
   </div>
+  <div class="card" id="guide">
+    <div class="row"><b>Все iPhone по порядку</b><button class="btn gray sm" id="guideToggle">Начать</button></div>
+    <div id="guideBody" class="hidden">
+      <div class="bar"><i id="guideBar" style="width:0"></i></div>
+      <p class="sub" id="guideText" style="margin:6px 0 0"></p>
+      <div class="actions"><button class="btn gray" id="guidePrev">← Назад</button><button class="btn" id="guideNext">Далее →</button></div>
+    </div>
+  </div>
   <div class="card"><h2>Образцы</h2><div id="trained"></div><div class="actions"><button class="btn red sm" id="resetTraining">Удалить все образцы</button></div></div>
+  <div class="card"><h2>Сохранение обучения</h2><p class="sub" style="margin-top:0" id="persistNote">Образцы сохраняются на этом устройстве автоматически.</p><div class="actions"><button class="btn gray" id="exportTraining">Сохранить в файл</button><button class="btn gray" id="importTrainingBtn">Загрузить из файла</button></div><input type="file" id="importTraining" accept="application/json,.json"></div>
   <p class="foot">Это простое сравнение изображений на телефоне, а не нейросеть. Похожие коробки (например, два цвета iPhone) можно перепутать, поэтому всегда проверяй результат. Если не уверен, выбери товар вручную в каталоге.</p>
 </section>
 

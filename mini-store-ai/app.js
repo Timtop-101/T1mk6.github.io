@@ -304,14 +304,65 @@ function renderLearn() {
   $('trained').replaceChildren(...(rows.length ? rows : [h('p', { class: 'sub' }, 'Пока нет образцов. Выбери коробку и сфотографируй её.')]));
 }
 const learnCam = makeCamera($('learnCam'), $('learnVideo'), $('learnPh'), $('learnStart'), $('learnSnap'), t => { $('learnMsg').textContent = t; });
-$('learnSnap').onclick = () => { const c = learnCam.grab(); if (!c) return; const id = Number($('learnSelect').value); if (learnAdd(c, id)) { $('learnMsg').textContent = 'Добавлено: ' + product(id).name + ' ✓ Сними ещё с другого угла.'; renderLearn(); } };
+$('learnSnap').onclick = () => { const c = learnCam.grab(); if (!c) return; const id = Number($('learnSelect').value); if (learnAdd(c, id)) { protectStorage(); $('learnMsg').textContent = 'Добавлено: ' + product(id).name + ' ✓ Сними ещё с другого угла.'; renderLearn(); } };
 $('learnFileBtn').onclick = () => $('learnFile').click();
 $('learnFile').onchange = async e => {
   const files = [...(e.target.files || [])]; e.target.value = ''; const id = Number($('learnSelect').value); let ok = 0;
   for (const f of files) { try { if (learnAdd(await canvasFromFile(f), id)) ok++; } catch (err) { $('learnMsg').textContent = err.message; } }
-  if (ok) { $('learnMsg').textContent = 'Добавлено фото: ' + ok + ' для «' + product(id).name + '» ✓'; renderLearn(); }
+  if (ok) { protectStorage(); $('learnMsg').textContent = 'Добавлено фото: ' + ok + ' для «' + product(id).name + '» ✓'; renderLearn(); }
 };
 $('resetTraining').onclick = () => { if (samples.length && confirm('Удалить все образцы?')) { samples = []; store.set('samples', samples); renderLearn(); } };
+
+/* ---------- Пошаговое обучение iPhone, защита и резервная копия ---------- */
+const IPHONES = PRODUCTS.filter(p => p.cat === 'iPhone');
+let guideIdx = -1;
+function renderGuide() {
+  const on = guideIdx >= 0; $('guideBody').classList.toggle('hidden', !on); $('guideToggle').textContent = on ? 'Закрыть' : 'Начать';
+  if (!on) return;
+  const p = IPHONES[guideIdx], n = samples.filter(s => s.id === p.id).length;
+  $('learnSelect').value = p.id; $('guideBar').style.width = ((guideIdx + 1) / IPHONES.length * 100) + '%';
+  $('guideText').textContent = 'Шаг ' + (guideIdx + 1) + ' из ' + IPHONES.length + ': ' + p.name + (n ? ' · фото: ' + n : ' · пока нет фото') + '. Добавь 2–3 фото коробки (камера или галерея), затем «Далее».';
+  $('guideNext').textContent = guideIdx === IPHONES.length - 1 ? 'Готово ✓' : 'Далее →'; $('guidePrev').disabled = guideIdx === 0;
+}
+$('guideToggle').onclick = () => { guideIdx = guideIdx >= 0 ? -1 : 0; renderGuide(); };
+$('guideNext').onclick = () => { if (guideIdx >= IPHONES.length - 1) { guideIdx = -1; toast('Обучение iPhone завершено'); } else guideIdx++; renderGuide(); };
+$('guidePrev').onclick = () => { if (guideIdx > 0) guideIdx--; renderGuide(); };
+$('learnSelect').addEventListener('change', () => { if (guideIdx >= 0) { const i = IPHONES.findIndex(p => p.id === Number($('learnSelect').value)); if (i >= 0) guideIdx = i; renderGuide(); } });
+const _renderLearn = renderLearn; renderLearn = function () { _renderLearn(); if (guideIdx >= 0) renderGuide(); };
+async function protectStorage() {
+  try {
+    if (navigator.storage && navigator.storage.persist) {
+      const ok = await navigator.storage.persist();
+      $('persistNote').textContent = ok ? 'Хранилище защищено: браузер не должен стирать образцы сам. Всё равно сделай копию в файл.' : 'Образцы сохраняются автоматически. Safari может стереть данные сайта, если не открывать его долго: поставь приложение «На экран Домой» и сохрани копию в файл.';
+    }
+  } catch {}
+}
+$('exportTraining').onclick = () => {
+  if (!samples.length) return toast('Пока нечего сохранять');
+  const blob = new Blob([JSON.stringify({ app: 'mini-store', v: 3, samples })], { type: 'application/json' });
+  const a = h('a', { href: URL.createObjectURL(blob), download: 'mini-store-training.json' }); document.body.append(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 4000); toast('Файл обучения сохранён');
+};
+$('importTrainingBtn').onclick = () => $('importTraining').click();
+$('importTraining').onchange = async e => {
+  const f = e.target.files && e.target.files[0]; e.target.value = ''; if (!f) return;
+  try {
+    const d = JSON.parse(await f.text()); const list = Array.isArray(d.samples) ? d.samples : [];
+    const ok = list.filter(s => product(s.id) && Array.isArray(s.v) && s.v.every(v => v && v.g && v.g.length === 256 && v.h && v.h.length === 16 && v.c && v.c.length === 27));
+    if (!ok.length) return toast('В файле нет подходящих образцов');
+    const have = new Set(samples.map(s => s.t + ':' + s.id)); let added = 0;
+    for (const s of ok) if (!have.has(s.t + ':' + s.id)) { samples.push({ id: s.id, t: s.t, th: typeof s.th === 'string' ? s.th : '', v: s.v }); added++; }
+    if (!store.set('samples', samples)) toast('Не хватило места на устройстве'); else toast('Загружено образцов: ' + added);
+    renderLearn();
+  } catch { toast('Не удалось прочитать файл'); }
+};
+// Встроенные образцы: если рядом лежит seed/seed.json, они добавляются автоматически (один раз).
+fetch('seed/seed.json').then(r => (r.ok ? r.json() : null)).then(d => {
+  if (!d || !Array.isArray(d.samples) || store.get('seedV', 0) >= (d.version || 1)) return;
+  const have = new Set(samples.map(s => s.t + ':' + s.id));
+  for (const s of d.samples) if (product(s.id) && !have.has(s.t + ':' + s.id)) samples.push(s);
+  store.set('samples', samples); store.set('seedV', d.version || 1); renderLearn();
+}).catch(() => {});
 
 /* ---------- Бесплатный консультант (правила + прайс) ---------- */
 const norm = s => String(s).toLowerCase().replace(/ё/g, 'е').replace(/[^\p{L}\p{N}]+/gu, ' ').trim();
