@@ -1,0 +1,32 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isWorker() {
+      return request.auth != null &&
+        exists(/databases/$(database)/documents/workers/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/workers/$(request.auth.uid)).data.active == true;
+    }
+    match /workers/{uid} {
+      allow read: if request.auth != null && request.auth.uid == uid;
+      allow write: if false; // Создаёт только администратор через Firebase Console.
+    }
+    match /orders/{id} {
+      allow create: if request.resource.data.keys().hasOnly(['name','phone','address','note','delivery','items','total','status','createdAt']) &&
+        request.resource.data.keys().hasAll(['name','phone','address','note','delivery','items','total','status','createdAt']) &&
+        request.resource.data.status == 'new' &&
+        request.resource.data.name is string && request.resource.data.name.size() >= 2 && request.resource.data.name.size() <= 80 &&
+        request.resource.data.phone is string && request.resource.data.phone.size() >= 7 && request.resource.data.phone.size() <= 40 &&
+        request.resource.data.address is string && request.resource.data.address.size() <= 350 &&
+        request.resource.data.note is string && request.resource.data.note.size() <= 500 &&
+        request.resource.data.delivery in ['Самовывоз','Доставка'] &&
+        request.resource.data.items is list && request.resource.data.items.size() > 0 && request.resource.data.items.size() <= 60 &&
+        request.resource.data.total is number && request.resource.data.total > 0 && request.resource.data.total < 1000000 &&
+        request.resource.data.createdAt == request.time;
+      allow read: if isWorker();
+      allow update: if isWorker() &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status']) &&
+        request.resource.data.status in ['new','accepted','preparing','ready','completed','cancelled'];
+      allow delete: if false;
+    }
+  }
+}
