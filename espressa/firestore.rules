@@ -10,6 +10,18 @@ service cloud.firestore {
       allow read: if request.auth != null && request.auth.uid == uid;
       allow write: if false; // Создаёт только администратор через Firebase Console.
     }
+    match /products/{id} {
+      allow read: if true;
+      allow create, update: if isWorker() &&
+        request.resource.data.keys().hasOnly(['name','category','price','active']) &&
+        request.resource.data.keys().hasAll(['name','category','price','active']) &&
+        request.resource.data.name is string &&
+        request.resource.data.name.size() > 0 && request.resource.data.name.size() <= 100 &&
+        request.resource.data.category in ['Роллы','Пицца','Кофе','Лимонады'] &&
+        request.resource.data.price is int && request.resource.data.price > 0 && request.resource.data.price <= 999999 &&
+        request.resource.data.active is bool;
+      allow delete: if false;
+    }
     match /orders/{id} {
       allow create: if request.resource.data.keys().hasOnly(['name','phone','address','note','delivery','items','total','status','createdAt']) &&
         request.resource.data.keys().hasAll(['name','phone','address','note','delivery','items','total','status','createdAt']) &&
