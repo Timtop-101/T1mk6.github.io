@@ -1,0 +1,36 @@
+name: Deploy EspressA Firestore Rules
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'espressa/firestore.rules'
+      - 'espressa/firebase.json'
+      - '.github/workflows/espressa-firestore-rules.yml'
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  deploy:
+    if: ${{ vars.ESPRESSA_WIF_PROVIDER != '' && vars.ESPRESSA_DEPLOY_SERVICE_ACCOUNT != '' }}
+    runs-on: ubuntu-latest
+    concurrency:
+      group: espressa-firestore-rules
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Authenticate to Google Cloud (no service account key)
+        uses: google-github-actions/auth@v2
+        with:
+          project_id: espressa-80660
+          workload_identity_provider: ${{ vars.ESPRESSA_WIF_PROVIDER }}
+          service_account: ${{ vars.ESPRESSA_DEPLOY_SERVICE_ACCOUNT }}
+      - name: Publish Firestore rules
+        working-directory: espressa
+        run: npx --yes firebase-tools@15.22.1 deploy --only firestore:rules --project espressa-80660 --non-interactive
