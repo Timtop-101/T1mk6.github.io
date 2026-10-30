@@ -1,7 +1,11 @@
 # EspressA — подключение онлайн-заказов
 1. Создайте проект на https://console.firebase.google.com.
 2. В Project settings → Your apps создайте Web App. Скопируйте apiKey, authDomain, projectId, appId в файл firebase-config.js в этом каталоге.
-3. В Build → Authentication → Sign-in method включите Email/Password. В Users добавьте сотрудников с разными email и паролями (не публикуйте пароли в GitHub).
+3. В Build → Authentication → Sign-in method включите Email/Password. Для сотрудников используем **номер телефона + пароль** на экране входа без SMS.
+   - Для каждого работника нормализуйте номер, оставив только цифры (например, +7 700 123 45 67 → 77001234567).
+   - В Authentication → Users → Add user создайте пользователя с email `77001234567@staff.espressa.example` и личным надёжным паролем. Для другого номера используйте его цифры перед `@staff.espressa.example`.
+   - При входе сотрудник вводит **свой телефон**, а сайт самостоятельно преобразует его в технический email для Firebase. Это **не SMS-подтверждение** и **не доказательство владения номером**; телефон используется как логин. Настоящие пароли никогда не сохраняйте в GitHub.
+   - Записывайте номер всегда одинаково при создании и входе. Для надёжной корпоративной аутентификации и восстановления доступа понадобится отдельный серверный механизм или администрирование в Firebase Console.
 4. В Build → Firestore Database создайте базу. В Rules вставьте правила из firestore.rules и нажмите Publish.
 5. В Firestore создайте коллекцию workers. Для каждого пользователя создайте документ с ID = UID из Authentication; внутри поле active (boolean) = true. Работник без документа workers/UID не увидит заказы.
 6. В Firebase Authentication → Settings → Authorized domains убедитесь, что домен timtop-101.github.io разрешён.
