@@ -1,4 +1,5 @@
 name: Deploy EspressA Firestore Rules
+# Deploys Firestore rules using GitHub OIDC when repository variables are configured.
 
 on:
   workflow_dispatch:
