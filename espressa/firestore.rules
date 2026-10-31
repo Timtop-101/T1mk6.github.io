@@ -17,7 +17,7 @@ service cloud.firestore {
         request.resource.data.keys().hasAll(['name','category','price','active']) &&
         request.resource.data.name is string &&
         request.resource.data.name.size() > 0 && request.resource.data.name.size() <= 100 &&
-        request.resource.data.category in ['Роллы','Пицца','Кофе','Лимонады'] &&
+        request.resource.data.category in ['Роллы','Пицца','Кофе','Лимонады','Напитки'] &&
         request.resource.data.price is int && request.resource.data.price > 0 && request.resource.data.price <= 999999 &&
         request.resource.data.active is bool;
       allow delete: if false;
