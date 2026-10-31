@@ -1,8 +1,8 @@
-import {initializeApp} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+import {initializeApp,getApps} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
 import {getFirestore,collection,addDoc,serverTimestamp} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 const config=window.ESPRESSA_FIREBASE_CONFIG;
 let db=null;
-if(config?.apiKey && config?.projectId && config?.appId){db=getFirestore(initializeApp(config));}
+if(config?.apiKey && config?.projectId && config?.appId){db=getFirestore(getApps().find(a=>a.options.projectId===config.projectId)||initializeApp(config));}
 const qs=id=>document.getElementById(id);
 const escape=s=>String(s).replace(/[&<>"']/g,x=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[x]));
 function show(msg){qs("checkoutMessage").textContent=msg;}
