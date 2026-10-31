@@ -1,5 +1,6 @@
 import {initializeApp,getApps} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
 import {getFirestore,collection,addDoc,serverTimestamp} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
+import {getAuth,authStateReady} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
 const config=window.ESPRESSA_FIREBASE_CONFIG;
 let db=null;
 if(config?.apiKey && config?.projectId && config?.appId){db=getFirestore(getApps().find(a=>a.options.projectId===config.projectId)||initializeApp(config));}
@@ -18,8 +19,11 @@ window.submitEspressaOrder=async function(){
  const total=items.reduce((s,x)=>s+x.qty*x.price,0);
  const btn=qs("submitOrder");btn.disabled=true;btn.textContent="Отправляем...";
  try{
- const ref=await addDoc(collection(db,"orders"),{name,phone,address:delivery==="Доставка"?address:"",note,delivery,items,total,status:"new",createdAt:serverTimestamp()});
- show("Заказ №"+ref.id.slice(0,8).toUpperCase()+" отправлен сотрудникам!");
+ const auth=getAuth(getApps().find(a=>a.options.projectId===config.projectId));await auth.authStateReady();
+ const payload={name,phone,address:delivery==="Доставка"?address:"",note,delivery,items,total,status:"new",createdAt:serverTimestamp()};
+ if(auth.currentUser)payload.ownerUid=auth.currentUser.uid;
+ const ref=await addDoc(collection(db,"orders"),payload);
+ show("Заказ №"+ref.id.slice(0,8).toUpperCase()+" отправлен сотрудникам!"+(auth.currentUser?" Смотрите статус в разделе «Мои заказы».":" Для отслеживания следующих заказов войдите в аккаунт перед оформлением."));
  window.resetEspressaCart();qs("checkoutForm").reset();
  }catch(e){console.error(e);show("Не удалось отправить заказ. Попробуйте ещё раз или скопируйте его.");}
  finally{btn.disabled=false;btn.textContent="Отправить работникам";}
