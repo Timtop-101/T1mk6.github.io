@@ -24,7 +24,7 @@ service cloud.firestore {
     }
     match /orders/{id} {
       allow create: if request.resource.data.keys().hasOnly(['name','phone','address','note','delivery','items','total','status','createdAt','ownerUid']) &&
-        request.resource.data.keys().hasAll(['name','phone','address','note','delivery','items','total','status','createdAt','ownerUid']) &&
+        request.resource.data.keys().hasAll(['name','phone','address','note','delivery','items','total','status','createdAt']) &&
         request.resource.data.status == 'new' &&
         (!('ownerUid' in request.resource.data) || (request.auth != null && request.resource.data.ownerUid == request.auth.uid)) &&
         request.resource.data.name is string && request.resource.data.name.size() >= 2 && request.resource.data.name.size() <= 80 &&
