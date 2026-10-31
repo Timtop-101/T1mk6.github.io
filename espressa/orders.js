@@ -1,6 +1,6 @@
 import {initializeApp,getApps} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
 import {getFirestore,collection,addDoc,serverTimestamp} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
-import {getAuth,authStateReady} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
+import {getAuth} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
 const config=window.ESPRESSA_FIREBASE_CONFIG;
 let db=null;
 if(config?.apiKey && config?.projectId && config?.appId){db=getFirestore(getApps().find(a=>a.options.projectId===config.projectId)||initializeApp(config));}
