@@ -23,9 +23,10 @@ service cloud.firestore {
       allow delete: if false;
     }
     match /orders/{id} {
-      allow create: if request.resource.data.keys().hasOnly(['name','phone','address','note','delivery','items','total','status','createdAt']) &&
-        request.resource.data.keys().hasAll(['name','phone','address','note','delivery','items','total','status','createdAt']) &&
+      allow create: if request.resource.data.keys().hasOnly(['name','phone','address','note','delivery','items','total','status','createdAt','ownerUid']) &&
+        request.resource.data.keys().hasAll(['name','phone','address','note','delivery','items','total','status','createdAt','ownerUid']) &&
         request.resource.data.status == 'new' &&
+        (!('ownerUid' in request.resource.data) || (request.auth != null && request.resource.data.ownerUid == request.auth.uid)) &&
         request.resource.data.name is string && request.resource.data.name.size() >= 2 && request.resource.data.name.size() <= 80 &&
         request.resource.data.phone is string && request.resource.data.phone.size() >= 7 && request.resource.data.phone.size() <= 40 &&
         request.resource.data.address is string && request.resource.data.address.size() <= 350 &&
@@ -34,7 +35,7 @@ service cloud.firestore {
         request.resource.data.items is list && request.resource.data.items.size() > 0 && request.resource.data.items.size() <= 60 &&
         request.resource.data.total is number && request.resource.data.total > 0 && request.resource.data.total < 1000000 &&
         request.resource.data.createdAt == request.time;
-      allow read: if isWorker();
+      allow read: if isWorker() || (request.auth != null && resource.data.get('ownerUid', '') == request.auth.uid);
       allow update: if isWorker() &&
         request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status']) &&
         request.resource.data.status in ['new','accepted','preparing','ready','completed','cancelled'];
