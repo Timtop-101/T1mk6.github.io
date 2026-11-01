@@ -10,6 +10,17 @@ service cloud.firestore {
       allow read: if request.auth != null && request.auth.uid == uid;
       allow write: if false; // Создаёт только администратор через Firebase Console.
     }
+    match /pushSubscriptions/{uid}/devices/{deviceId} {
+      allow read, delete: if request.auth != null && request.auth.uid == uid;
+      allow create, update: if request.auth != null && request.auth.uid == uid &&
+        request.resource.data.keys().hasOnly(['token','role','enabled','updatedAt']) &&
+        request.resource.data.keys().hasAll(['token','role','enabled','updatedAt']) &&
+        request.resource.data.token is string && request.resource.data.token.size() > 20 && request.resource.data.token.size() < 4096 &&
+        request.resource.data.enabled == true &&
+        request.resource.data.updatedAt is timestamp &&
+        request.resource.data.role in ['customer','worker'] &&
+        (request.resource.data.role == 'customer' || isWorker());
+    }
     match /products/{id} {
       allow read: if true;
       allow create, update: if isWorker() &&
