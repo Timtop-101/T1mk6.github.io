@@ -18,7 +18,7 @@ window.addEventListener("unhandledrejection",e=>{
  const stage=document.getElementById("authStage");
  if(stage)stage.textContent="Ошибка подключения: "+(e.reason?.code||e.reason?.message||"неизвестно");
 });
-</script><div style="padding:12px 22px;background:#10251a;color:white"><button id="enableEspressaPush" type="button">🔔 Включить уведомления</button> <small id="espressaPushStatus"></small></div><script type="module" src="./push.js"></script><script type="module">
+</script><div style="padding:12px 22px;background:#10251a;color:white"><button id="enableEspressaPush" type="button">🔔 Включить уведомления</button> <small id="espressaPushStatus"></small></div><script src="./push-config.js"></script><script type="module" src="./push.js"></script><script type="module">
 import {initializeApp} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
 import {getAuth,onAuthStateChanged,signInWithEmailAndPassword,signOut} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
 import {getFirestore,doc,getDoc,collection,onSnapshot,orderBy,query,updateDoc,setDoc,addDoc} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
