@@ -25,6 +25,6 @@ window.submitEspressaOrder=async function(){
  const ref=await addDoc(collection(db,"orders"),payload);
  show("Заказ №"+ref.id.slice(0,8).toUpperCase()+" отправлен сотрудникам!"+(auth.currentUser?" Смотрите статус в разделе «Мои заказы».":" Для отслеживания следующих заказов войдите в аккаунт перед оформлением."));
  window.resetEspressaCart();qs("checkoutForm").reset();
- }catch(e){console.error(e);show("Не удалось отправить заказ. Попробуйте ещё раз или скопируйте его.");}
+ }catch(e){console.error(e);show("Заказ НЕ отправлен: "+(e.code||e.message||"ошибка Firebase")+". Проверьте доступ Firestore и повторите.");}
  finally{btn.disabled=false;btn.textContent="Отправить работникам";}
 };
