@@ -10,7 +10,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Mini Store">
 <meta name="format-detection" content="telephone=no">
-<title>Mini Store — игровая касса</title>
+<title>Mini Store AI 4.0 — игровая касса</title>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icon-180.png">
@@ -21,7 +21,7 @@
 
 <!-- СКАНЕР -->
 <section id="page-scan">
-  <div class="top"><div><div class="eyebrow">MINI STORE</div><h1>Сканер</h1></div><span class="badge" id="trainedBadge">0 из 16</span></div>
+  <div class="top"><div><div class="eyebrow">MINI STORE</div><h1>Сканер</h1></div><span class="badge" id="trainedBadge">0 из 17</span></div>
   <p class="lead">Наведи камеру на коробку. Приложение сравнит её с фото из раздела «Обучение». Всё считается прямо на телефоне, бесплатно и без интернета.</p>
   <div class="card">
     <div class="cam off" id="scanCam"><video id="scanVideo" autoplay muted playsinline></video><div class="ph" id="scanPh"><b>📦</b>Включи камеру или выбери фото</div><div class="frame"></div><div class="tip">Коробка в рамке, хороший свет</div></div>
@@ -42,7 +42,7 @@
 
 <!-- КАТАЛОГ -->
 <section id="page-catalog" class="hidden">
-  <div class="top"><div><div class="eyebrow">16 ТОВАРОВ</div><h1>Каталог</h1></div></div>
+  <div class="top"><div><div class="eyebrow">17 ТОВАРОВ</div><h1>Каталог</h1></div></div>
   <input class="field search" id="search" type="search" placeholder="Поиск товара" aria-label="Поиск товара" autocomplete="off">
   <div class="chips scroll" id="cats"></div>
   <div class="grid" id="products"></div>
@@ -91,7 +91,7 @@
   <div class="top"><div><div class="eyebrow">ЛОКАЛЬНОЕ РАСПОЗНАВАНИЕ</div><h1>Обучение</h1></div></div>
   <p class="lead">Сфотографируй каждую коробку: 2–3 фото под разными углами при хорошем свете. Фото остаются только на этом устройстве.</p>
   <div class="card">
-    <div class="row"><b id="learnProgress">Обучено 0 из 16</b><span class="sub" id="learnCount"></span></div>
+    <div class="row"><b id="learnProgress">Обучено 0 из 17</b><span class="sub" id="learnCount"></span></div>
     <div class="bar"><i id="learnBar" style="width:0"></i></div>
     <label class="l" for="learnSelect" style="margin-top:14px">Какая коробка</label>
     <select id="learnSelect" class="field"></select>
@@ -112,12 +112,13 @@
       <div class="actions"><button class="btn gray" id="guidePrev">← Назад</button><button class="btn" id="guideNext">Далее →</button></div>
     </div>
   </div>
+  <div class="card"><h2>Фото из интернета</h2><p class="sub" style="margin-top:0">Бесплатный поиск на Wikimedia Commons для выбранной выше модели. Нужен интернет. Лучше всего работают твои собственные фото коробок.</p><button class="btn gray" id="searchInternet">Найти фото в интернете</button><div class="msg" id="internetStatus"></div><div class="nets" id="internetResults"></div></div>
   <div class="card"><h2>Образцы</h2><div id="trained"></div><div class="actions"><button class="btn red sm" id="resetTraining">Удалить все образцы</button></div></div>
   <div class="card"><h2>Сохранение обучения</h2><p class="sub" style="margin-top:0" id="persistNote">Образцы сохраняются на этом устройстве автоматически.</p><div class="actions"><button class="btn gray" id="exportTraining">Сохранить в файл</button><button class="btn gray" id="importTrainingBtn">Загрузить из файла</button></div><input type="file" id="importTraining" accept="application/json,.json"></div>
   <p class="foot">Это простое сравнение изображений на телефоне, а не нейросеть. Похожие коробки (например, два цвета iPhone) можно перепутать, поэтому всегда проверяй результат. Если не уверен, выбери товар вручную в каталоге.</p>
 </section>
 
-<p class="foot">Неофициальное игровое приложение. Не связано с Apple. Все цены игровые.<br>Бесплатно · без сервера · данные хранятся только на этом устройстве.</p>
+<p class="foot">Неофициальное игровое приложение. Не связано с Apple. Все цены игровые.<br>Бесплатно · без сервера · данные хранятся только на этом устройстве.<br><span id="ver"></span></p>
 </main>
 
 <nav class="tabs" aria-label="Разделы">

@@ -4,10 +4,12 @@
    Данные (корзина, образцы, продажи) хранятся в localStorage этого устройства. */
 
 /* ---------- Товары и цены (16 штук, цены владельца) ---------- */
+const APP_VERSION = '4.0.0';
 const PRODUCTS = [
   { id: 0,  name: 'iPhone 17 Pro Max Blue',   price: 700000, cat: 'iPhone',       icon: '📱', tint: ['#5ac8fa', '#007aff'] },
   { id: 1,  name: 'iPhone 17 Pro Max Orange', price: 800000, cat: 'iPhone',       icon: '📱', tint: ['#ffb340', '#ff7a00'] },
   { id: 2,  name: 'iPhone 15 Pro Max',        price: 15000,  cat: 'iPhone',       icon: '📱', tint: ['#9aa0aa', '#5d6270'] },
+  { id: 16, name: 'iPhone 14 Pro Max',       price: 50000,  cat: 'iPhone',       icon: '📱', tint: ['#b9a6ff', '#6a4fd1'] },
   { id: 3,  name: 'iPhone 13 Blue',           price: 12000,  cat: 'iPhone',       icon: '📱', tint: ['#7cc7ff', '#3d8bff'] },
   { id: 4,  name: 'iPhone 13 Pink',           price: 13000,  cat: 'iPhone',       icon: '📱', tint: ['#ff9fc4', '#ff5f9e'] },
   { id: 5,  name: 'iPhone XS Max',            price: 10000,  cat: 'iPhone',       icon: '📱', tint: ['#a3a3aa', '#6a6a72'] },
@@ -22,6 +24,8 @@ const PRODUCTS = [
   { id: 14, name: 'iPad',                     price: 300000, cat: 'iPad',         icon: '📲', tint: ['#b19cff', '#6c5ce7'] },
   { id: 15, name: 'Apple Pencil',             price: 20000,  cat: 'Аксессуары',   icon: '✏️', tint: ['#f2d36b', '#e0a800'] },
 ];
+const IMG = { 0: 'iphone-17-pro-max-blue', 1: 'iphone-17-pro-max-orange', 2: 'iphone-15-pro-max', 16: 'iphone-14-pro-max', 3: 'iphone-13-blue', 4: 'iphone-13-pink', 5: 'iphone-xs-max', 6: 'iphone-12', 7: 'iphone-5', 8: 'airpods', 9: 'airpods-pro', 10: 'power-adapter', 11: 'apple-watch-se', 12: 'ipad-air', 13: 'macbook-pro', 14: 'ipad', 15: 'apple-pencil' };
+PRODUCTS.forEach(p => { p.img = 'assets/' + IMG[p.id] + '.svg'; });
 const CATS = ['Все', 'iPhone', 'iPad', 'Mac', 'Watch', 'AirPods', 'Аксессуары'];
 const product = id => PRODUCTS.find(p => p.id === Number(id));
 
@@ -50,7 +54,15 @@ function toast(text) {
   const t = $('toast'); t.textContent = text; t.classList.add('show');
   clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('show'), 2300);
 }
-const tile = (p, small) => h('div', { class: 'tile' + (small ? ' sm' : ''), style: `background:linear-gradient(145deg,${p.tint[0]},${p.tint[1]})`, 'aria-hidden': 'true' }, p.icon);
+const tile = (p, small) => {
+  const t = h('div', { class: 'tile' + (small ? ' sm' : ''), style: `background:linear-gradient(145deg,${p.tint[0]},${p.tint[1]})`, 'aria-hidden': 'true' }, p.icon);
+  if (p.img) { const im = h('img', { src: p.img, alt: '', decoding: 'async' }); im.onload = () => { t.textContent = ''; t.classList.add('pic'); t.append(im); }; }
+  return t;
+};
+function picture(p) {
+  const box = h('div', { class: 'pic-big', style: `background:linear-gradient(145deg,${p.tint[0]},${p.tint[1]})` }, h('span', {}, p.icon));
+  const im = h('img', { src: p.img, alt: p.name, decoding: 'async' }); im.onload = () => { box.textContent = ''; box.append(im); }; return box;
+}
 
 /* ---------- Корзина ---------- */
 let cart = store.get('cart', {});
@@ -78,7 +90,7 @@ function renderCatalog() {
   $('products').replaceChildren(...(list.length ? list.map(p => {
     const n = cart[p.id] || 0;
     return h('div', { class: 'prod' },
-      h('div', { class: 'top2' }, tile(p), h('div', { class: 'grow' }, h('div', { class: 'name' }, p.name), h('div', { class: 'price' }, fmt(p.price)))),
+      picture(p), h('div', {}, h('div', { class: 'name' }, p.name), h('div', { class: 'price' }, fmt(p.price))),
       n ? h('div', { class: 'row' }, h('div', { class: 'step' }, h('button', { 'aria-label': 'Меньше', onclick: () => addToCart(p.id, -1, true) }, '−'), h('span', {}, n), h('button', { 'aria-label': 'Больше', onclick: () => addToCart(p.id, 1, true) }, '+')), h('span', { class: 'tag good' }, 'В корзине'))
         : h('button', { class: 'btn', onclick: () => addToCart(p.id) }, 'Добавить'));
   }) : [h('p', { class: 'sub' }, 'Ничего не найдено. Попробуй другое слово.')]));
@@ -283,8 +295,9 @@ function thumb(canvas) {
   const c = document.createElement('canvas'); c.width = c.height = 64; const sw = canvas.width * .72, sh = canvas.height * .72;
   c.getContext('2d').drawImage(canvas, (canvas.width - sw) / 2, (canvas.height - sh) / 2, sw, sh, 0, 0, 64, 64); return c.toDataURL('image/jpeg', .6);
 }
-function learnAdd(canvas, id) {
+function learnAdd(canvas, id, meta) {
   const s = { id, t: Date.now(), th: thumb(canvas), v: [extract(canvas, .72), extract(canvas, .6), extract(canvas, .85)] };
+  if (meta) Object.assign(s, meta);
   samples.push(s);
   if (!store.set('samples', samples)) { samples.pop(); $('learnMsg').textContent = 'Память устройства заполнена: удали часть образцов.'; return false; }
   return true;
@@ -294,8 +307,8 @@ function renderLearn() {
   sel.replaceChildren(...PRODUCTS.map(p => { const n = samples.filter(s => s.id === p.id).length; return h('option', { value: p.id }, (n ? '✓ ' : '') + p.name + (n ? ' (' + n + ')' : '')); }));
   if (cur) sel.value = cur;
   const done = new Set(samples.map(s => s.id)).size;
-  $('learnProgress').textContent = 'Обучено ' + done + ' из 16'; $('learnBar').style.width = (done / 16 * 100) + '%';
-  $('trainedBadge').textContent = done + ' из 16'; $('learnCount').textContent = samples.length + ' фото';
+  $('learnProgress').textContent = 'Обучено ' + done + ' из ' + PRODUCTS.length; $('learnBar').style.width = (done / PRODUCTS.length * 100) + '%';
+  $('trainedBadge').textContent = done + ' из ' + PRODUCTS.length; $('learnCount').textContent = samples.length + ' фото';
   const rows = PRODUCTS.filter(p => samples.some(s => s.id === p.id)).map(p => {
     const ss = samples.filter(s => s.id === p.id);
     return h('div', { class: 'item' }, h('div', { class: 'grow' }, h('div', { class: 'name' }, p.name), h('div', { class: 'sub' }, ss.length + ' фото'), h('div', { class: 'chips', style: 'margin-top:6px' }, ss.slice(0, 6).map(s => h('img', { class: 'photo', src: s.th, alt: '' })))),
@@ -338,10 +351,10 @@ async function protectStorage() {
   } catch {}
 }
 $('exportTraining').onclick = () => {
-  if (!samples.length) return toast('Пока нечего сохранять');
-  const blob = new Blob([JSON.stringify({ app: 'mini-store', v: 3, samples })], { type: 'application/json' });
-  const a = h('a', { href: URL.createObjectURL(blob), download: 'mini-store-training.json' }); document.body.append(a); a.click(); a.remove();
-  setTimeout(() => URL.revokeObjectURL(a.href), 4000); toast('Файл обучения сохранён');
+  if (!samples.length && !store.get('sales', []).length) return toast('Пока нечего сохранять');
+  const blob = new Blob([JSON.stringify({ app: 'mini-store', v: 4, exported: new Date().toISOString(), samples, sales: store.get('sales', []) })], { type: 'application/json' });
+  const a = h('a', { href: URL.createObjectURL(blob), download: 'mini-store-backup-' + new Date().toISOString().slice(0, 10) + '.json' }); document.body.append(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 4000); toast('Резервная копия сохранена');
 };
 $('importTrainingBtn').onclick = () => $('importTraining').click();
 $('importTraining').onchange = async e => {
@@ -353,6 +366,7 @@ $('importTraining').onchange = async e => {
     const have = new Set(samples.map(s => s.t + ':' + s.id)); let added = 0;
     for (const s of ok) if (!have.has(s.t + ':' + s.id)) { samples.push({ id: s.id, t: s.t, th: typeof s.th === 'string' ? s.th : '', v: s.v }); added++; }
     if (!store.set('samples', samples)) toast('Не хватило места на устройстве'); else toast('Загружено образцов: ' + added);
+    if (Array.isArray(d.sales)) { const sales = store.get('sales', []), seen = new Set(sales.map(x => x.t)); for (const x of d.sales) if (x && x.t && Array.isArray(x.items) && x.items.every(i => product(i.id)) && !seen.has(x.t)) sales.push(x); sales.sort((a, b) => b.t - a.t); store.set('sales', sales.slice(0, 60)); renderHistory(); }
     renderLearn();
   } catch { toast('Не удалось прочитать файл'); }
 };
@@ -363,6 +377,45 @@ fetch('seed/seed.json').then(r => (r.ok ? r.json() : null)).then(d => {
   for (const s of d.samples) if (product(s.id) && !have.has(s.t + ':' + s.id)) samples.push(s);
   store.set('samples', samples); store.set('seedV', d.version || 1); renderLearn();
 }).catch(() => {});
+
+/* ---------- Фото из интернета (Wikimedia Commons, бесплатно, нужен интернет) ---------- */
+// Картинки остаются собственностью авторов и в приложение не вшиваются: берутся по запросу, у каждой есть ссылка на лицензию.
+async function commonsSearch(name) {
+  const q = name.replace(/ (Blue|Orange|Pink)$/i, '').replace('Power Adapter', 'Apple power adapter') + ' box';
+  const u = new URL('https://commons.wikimedia.org/w/api.php');
+  u.search = new URLSearchParams({ action: 'query', generator: 'search', gsrsearch: 'filetype:bitmap ' + q, gsrnamespace: '6', gsrlimit: '16', prop: 'imageinfo', iiprop: 'url|mime', iiurlwidth: '420', format: 'json', origin: '*' }).toString();
+  const r = await fetch(u.toString()); if (!r.ok) throw new Error('поиск временно недоступен');
+  const d = await r.json();
+  return Object.values((d.query && d.query.pages) || {}).filter(p => p.imageinfo && p.imageinfo[0] && p.imageinfo[0].thumburl && /^image\/(jpeg|png|webp)$/.test(p.imageinfo[0].mime) && p.imageinfo[0].thumburl.startsWith('https://')).slice(0, 12);
+}
+function canvasFromUrl(url) {
+  return new Promise((resolve, reject) => {
+    const img = new Image(); img.crossOrigin = 'anonymous'; img.referrerPolicy = 'no-referrer';
+    img.onload = () => { try { const k = Math.min(1, 640 / Math.max(img.naturalWidth, img.naturalHeight)), c = document.createElement('canvas'); c.width = Math.max(1, Math.round(img.naturalWidth * k)); c.height = Math.max(1, Math.round(img.naturalHeight * k)); c.getContext('2d').drawImage(img, 0, 0, c.width, c.height); c.toDataURL('image/jpeg', .1); resolve(c); } catch { reject(new Error('сайт не разрешает анализ этого фото')); } };
+    img.onerror = () => reject(new Error('не удалось загрузить фото'));
+    img.src = url;
+  });
+}
+$('searchInternet').onclick = async () => {
+  const id = Number($('learnSelect').value), p = product(id), st = $('internetStatus'), box = $('internetResults'), btn = $('searchInternet');
+  if (navigator.onLine === false) { st.textContent = 'Нет интернета. Добавь свои фото коробки.'; return; }
+  st.textContent = 'Ищем фото: ' + p.name + '…'; box.replaceChildren(); btn.disabled = true;
+  try {
+    const found = await commonsSearch(p.name);
+    if (!found.length) { st.textContent = 'Для этой модели ничего не нашлось. Добавь своё фото коробки.'; return; }
+    st.textContent = 'Найдено: ' + found.length + '. Выбирай только фото именно этой модели — чужие фото ухудшат распознавание.';
+    for (const d of found) {
+      const info = d.imageinfo[0], add = h('button', { class: 'btn sm' }, '+ В обучение');
+      add.onclick = async () => {
+        add.disabled = true; add.textContent = 'Добавляем…';
+        try { const c = await canvasFromUrl(info.thumburl); if (!learnAdd(c, id, { source: 'Wikimedia Commons', url: info.descriptionurl || '', title: d.title })) throw new Error('не хватает памяти'); protectStorage(); renderLearn(); add.textContent = '✓ Добавлено'; }
+        catch (e) { add.disabled = false; add.textContent = '+ В обучение'; $('learnMsg').textContent = 'Не добавилось: ' + e.message + '. Сохрани фото и добавь через галерею.'; }
+      };
+      box.append(h('div', { class: 'net' }, h('img', { src: info.thumburl, alt: d.title, loading: 'lazy', referrerpolicy: 'no-referrer' }), h('small', {}, d.title.replace(/^File:/, '')), h('a', { href: info.descriptionurl || 'https://commons.wikimedia.org', target: '_blank', rel: 'noopener noreferrer' }, 'Источник и лицензия'), add));
+    }
+  } catch (e) { st.textContent = 'Не удалось найти фото: ' + e.message + '. Используй свои фото.'; }
+  finally { btn.disabled = false; }
+};
 
 /* ---------- Бесплатный консультант (правила + прайс) ---------- */
 const norm = s => String(s).toLowerCase().replace(/ё/g, 'е').replace(/[^\p{L}\p{N}]+/gu, ' ').trim();
@@ -548,4 +601,13 @@ document.addEventListener('visibilitychange', () => { if (document.hidden) { sca
 renderCats(); renderCatalog(); renderCart(); renderLearn(); renderVoice(); initVoiceUi();
 bubble('Привет! Я бесплатный консультант Mini Store 👋 Спроси цену, скажи «добавь AirPods Pro» или «что купить на 15000?».');
 const start = (location.hash || '').slice(1); if (['scan', 'catalog', 'cart', 'chat', 'learn'].includes(start)) tab(start);
-if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+$('ver').textContent = 'Версия ' + APP_VERSION;
+if ('serviceWorker' in navigator) {
+  let reloading = false, hadController = !!navigator.serviceWorker.controller;
+  navigator.serviceWorker.addEventListener('controllerchange', () => { if (!hadController) { hadController = true; return; } if (reloading) return; reloading = true; toast('Приложение обновлено'); setTimeout(() => location.reload(), 600); });
+  navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' }).then(reg => {
+    reg.update().catch(() => {});
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) reg.update().catch(() => {}); });
+    setInterval(() => reg.update().catch(() => {}), 30 * 60 * 1000);
+  }).catch(() => {});
+}
