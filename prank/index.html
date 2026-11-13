@@ -35,7 +35,7 @@ button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
 #reveal h1{font-size:clamp(34px,9vw,64px);margin:0 0 10px;font-weight:400;line-height:1}
 #reveal p{margin:0 0 18px;font-size:24px}
 #reveal button{color:var(--onfill);border-color:var(--onfill)}
-#tag{position:fixed;left:max(16px,env(safe-area-inset-left,0px));bottom:calc(8px + env(safe-area-inset-bottom,0px));font-size:14px;color:var(--dim)}
+#tag{position:fixed;left:max(16px,env(safe-area-inset-left,0px));right:max(16px,env(safe-area-inset-right,0px));bottom:calc(8px + env(safe-area-inset-bottom,0px));font-size:14px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 @media (prefers-reduced-motion:no-preference){#lock.on{animation:in .4s steps(4)}@keyframes in{from{opacity:0}}}
 </style>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=VT323&display=swap">
@@ -56,7 +56,7 @@ button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
 
 <div id="warn"><div>Замечена и пресечена попытка взломать систему!<br><br><button id="ok" type="button">[OK]</button></div></div>
 <div id="reveal"><div><h1>ЭТО ШУТКА</h1><p>Ничего не зашифровано. Компьютер в полном порядке.</p><button id="back" type="button">[Ещё раз]</button></div></div>
-<div id="tag">шуточная страница · ничего не устанавливает и не собирает данные</div>
+<div id="tag" aria-hidden="true">C:\&gt; dir /s<br><span id="dir"></span></div>
 
 <script>
 const $=id=>document.getElementById(id);
@@ -80,6 +80,8 @@ $("f").addEventListener("submit",e=>{
 });
 $("ok").onclick=()=>{$("warn").classList.remove("on");$("code").value="";$("code").focus()};
 $("back").onclick=()=>{left=47*3600+55*60+21;start()};
+const names=["Documents\\report_2024.docx","Pictures\\IMG_0412.jpg","Desktop\\notes.txt","Downloads\\setup.exe","AppData\\Local\\Temp\\tmp3F2A.tmp","Music\\track01.mp3","Videos\\clip.mp4","Documents\\Games\\save01.dat"];
+let k=0;setInterval(()=>{$("dir").textContent="C:\\Users\\"+names[k++%names.length]+"   ->  .ncrypt"},120);
 start();
 </script>
 </body></html>
