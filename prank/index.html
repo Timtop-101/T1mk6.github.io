@@ -47,28 +47,28 @@ button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
 
 <div id="boot" aria-live="polite"></div>
 <div id="logo" hidden><svg viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="46" fill="none" stroke="#ff2bd6" stroke-width="3"/><circle cx="50" cy="50" r="33" fill="none" stroke="#ff2bd6" stroke-width="1.5"/><circle cx="50" cy="50" r="19" fill="#ff2bd6"/><path d="M12 50h76M50 12v76" stroke="#000" stroke-width="2"/></svg></div>
-<div id="stat">files: <span id="fc">0</span><br>drives: C: D: E:<br>cpu load: <span id="cpu">99</span>%</div>
+<div id="stat">files: <span id="fc">0</span><br>storage: internal, sdcard<br>cpu load: <span id="cpu">99</span>%</div>
 <div id="timer"><div>До самоуничтожения:</div><div id="clock">47:59:59</div></div>
 
 <main id="lock">
   <div class="title">Ваши файлы «зашифрованы»!</div>
-  <div class="box"><p>Ваш компьютер «заблокирован», а все диски и файлы на нём «зашифрованы» группировкой ПРАНК-777. Любые попытки снять блокировку приведут к тому, что вы немедленно улыбнётесь. Для разблокировки введите секретный код, который знает только тот, кто прислал ссылку.</p></div>
+  <div class="box"><p>Ваше устройство «заблокировано», а вся память и файлы на нём «зашифрованы» группировкой ПРАНК-777. Любые попытки снять блокировку приведут к тому, что вы немедленно улыбнётесь. Для разблокировки введите секретный код, который знает только тот, кто прислал ссылку.</p></div>
   <form class="box" id="f" autocomplete="off">
     <div style="text-align:center">Введите код разблокировки:</div>
     <div class="bar"><input id="code" placeholder="_ _ _ _ _ _" aria-label="Код разблокировки"></div>
     <div id="bt" aria-hidden="true"><i id="bi"></i></div>
-    <div class="meta"><span>Current PC: DESKTOP-PRANK1<br>Windows 10 Pro 22H2 (build 19045.5247) x64<br>IP: null</span><button type="submit">[Enter]</button></div>
+    <div class="meta"><span>Current device: DEVICE-PRANK1<br>Device OS: mobile (build 19045.5247)<br>IP: null</span><button type="submit">[Enter]</button></div>
   </form>
 </main>
 
 <div id="warn"><div>Замечена и пресечена попытка взломать систему!<br><br><button id="ok" type="button">[OK]</button></div></div>
-<div id="reveal"><div><h1>ЭТО ШУТКА</h1><p>Ничего не зашифровано. Компьютер в полном порядке.</p><button id="back" type="button">[Ещё раз]</button></div></div>
+<div id="reveal"><div><h1>ЭТО ШУТКА</h1><p>Ничего не зашифровано. Устройство в полном порядке.</p><button id="back" type="button">[Ещё раз]</button></div></div>
 <div id="id" aria-hidden="true">ID: 3A-91-C2B04E5D18</div>
-<div id="tag" aria-hidden="true">C:\&gt; dir /s<br><span id="dir" class="cur"></span></div>
+<div id="tag" aria-hidden="true">/sdcard&gt; dir /s<br><span id="dir" class="cur"></span></div>
 
 <script>
 const $=id=>document.getElementById(id);
-const lines=["NCrypt started, blocking system. . .","[ OK ] loading kernel module ncrypt.sys","[ OK ] hooking explorer.exe","[ OK ] disabling task manager","[ OK ] scanning drives C: D: E:","XDWD: 0x03527737","XDWD: 0x0266712","XDWD: 0x02897593","XDWD: 0x01447812","XDWD: 0x0150974","XDWD: 0x03873700","XDWD: 0x0700882","XDWD: 0x03803618","AES-256 key generated: 7F3A-91C2-B04E-5D18","uploading key to server . . . 100%","Creator: @pranker (шутка)","  Комп в безопасности :)","","  *  не выключай ПК, сладкий)"];
+const lines=["NCrypt started, blocking system. . .","[ OK ] loading kernel module ncrypt.sys","[ OK ] hooking system_server","[ OK ] disabling recovery mode","[ OK ] scanning storage internal sdcard","XDWD: 0x03527737","XDWD: 0x0266712","XDWD: 0x02897593","XDWD: 0x01447812","XDWD: 0x0150974","XDWD: 0x03873700","XDWD: 0x0700882","XDWD: 0x03803618","AES-256 key generated: 7F3A-91C2-B04E-5D18","uploading key to server . . . 100%","Creator: @pranker (шутка)","  Устройство в безопасности :)","","  *  не выключай устройство, сладкий)"];
 let t=null,left=47*3600+55*60+21;
 function start(){
   clearInterval(t);$("boot").textContent="";$("lock").classList.remove("on");$("timer").classList.remove("on");$("stat").classList.remove("on");$("reveal").classList.remove("on");$("logo").hidden=true;
@@ -88,8 +88,8 @@ $("f").addEventListener("submit",e=>{
 });
 $("ok").onclick=()=>{$("warn").classList.remove("on");$("code").value="";$("code").focus()};
 $("back").onclick=()=>{left=47*3600+55*60+21;start()};
-const names=["Documents\\report_2024.docx","Pictures\\IMG_0412.jpg","Desktop\\notes.txt","Downloads\\setup.exe","AppData\\Local\\Temp\\tmp3F2A.tmp","Music\\track01.mp3","Videos\\clip.mp4","Documents\\Games\\save01.dat","Windows\\System32\\config\\SAM","Users\\Public\\Pictures\\wallpaper.png","ProgramData\\cache\\db.sqlite","Documents\\Курсовая.docx","Downloads\\photo_2024.jpg","Desktop\\passwords.txt"];
-let k=0;setInterval(()=>{$("dir").textContent="C:\\Users\\"+names[k++%names.length]+"   ->  .ncrypt"},120);
+const names=["DCIM/Camera/IMG_0412.jpg","Documents/report_2024.docx","Download/setup.apk","Music/track01.mp3","Movies/clip.mp4","Pictures/Screenshots/scr_0231.png","Android/data/app/cache.db","WhatsApp/Media/voice_note.opus","Telegram/Telegram Images/photo.jpg","Download/photo_2024.jpg"];
+let k=0;setInterval(()=>{$("dir").textContent="/sdcard/"+names[k++%names.length]+"   ->  .ncrypt"},120);
 let fc=0,pr=0;setInterval(()=>{if(!$("stat").classList.contains("on"))return;fc+=Math.floor(Math.random()*40);$("fc").textContent=fc.toLocaleString("ru-RU");$("cpu").textContent=94+Math.floor(Math.random()*6);pr=(pr+Math.random()*3)%100;$("bi").style.width=pr+"%"},400);
 start();
 </script>
