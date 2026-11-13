@@ -68,7 +68,7 @@ button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
 
 <script>
 const $=id=>document.getElementById(id);
-const lines=["NCrypt started, blocking system. . .","[ OK ] loading kernel module ncrypt.sys","[ OK ] hooking system_server","[ OK ] disabling recovery mode","[ OK ] scanning storage internal sdcard","XDWD: 0x03527737","XDWD: 0x0266712","XDWD: 0x02897593","XDWD: 0x01447812","XDWD: 0x0150974","XDWD: 0x03873700","XDWD: 0x0700882","XDWD: 0x03803618","AES-256 key generated: 7F3A-91C2-B04E-5D18","uploading key to server . . . 100%","Creator: @T1mk6","  Устройство в безопасности :)"];
+const lines=["NCrypt started, blocking system. . .","[ OK ] loading kernel module ncrypt.sys","[ OK ] hooking system_server","[ OK ] disabling recovery mode","[ OK ] scanning storage internal sdcard","XDWD: 0x03527737","XDWD: 0x0266712","XDWD: 0x02897593","XDWD: 0x01447812","XDWD: 0x0150974","XDWD: 0x03873700","XDWD: 0x0700882","XDWD: 0x03803618","AES-256 key generated: 7F3A-91C2-B04E-5D18","uploading key to server . . . 100%","Creator: VBS BLES SMOK","  Устройство в безопасности :)"];
 let t=null,left=47*3600+55*60+21;
 function start(){
   clearInterval(t);$("boot").textContent="";$("lock").classList.remove("on");$("timer").classList.remove("on");$("stat").classList.remove("on");$("reveal").classList.remove("on");$("logo").hidden=true;
@@ -79,7 +79,7 @@ function start(){
     setTimeout(()=>{$("boot").textContent="";$("logo").hidden=true;$("lock").classList.add("on");$("timer").classList.add("on");$("stat").classList.add("on");$("code").focus();tick();typeMsg();t=setInterval(tick,1000)},2200);
   },70);
 }
-const MSG="Ваше устройство «заблокировано», а вся память и все файлы на нём «зашифрованы» группировкой T1mk6. Любые действия, связанные с попыткой снятия блокировки, нанесут непоправимый вред вашему устройству и приведут к потере всех важных файлов без возможности восстановления. При попытке снять блокировку все ваши данные будут «выгружены» в сеть, а на ваш процессор будет подана рекурсивная нагрузка, что приведёт к его «неисправности». Не пытайтесь выключить, перезагрузить или заблокировать устройство. Не удаляйте приложения, не закрывайте вкладку и не сворачивайте экран. Каждая секунда промедления ухудшает ситуацию. Для разблокировки введите секретный код, который знает только тот, кто прислал ссылку.";
+const MSG="Ваше устройство «заблокировано», а вся память и все файлы на нём «зашифрованы» группировкой VBS BLES SMOK. Любые действия, связанные с попыткой снятия блокировки, нанесут непоправимый вред вашему устройству и приведут к потере всех важных файлов без возможности восстановления. При попытке снять блокировку все ваши данные будут «выгружены» в сеть, а на ваш процессор будет подана рекурсивная нагрузка, что приведёт к его «неисправности». Не пытайтесь выключить, перезагрузить или заблокировать устройство. Не удаляйте приложения, не закрывайте вкладку и не сворачивайте экран. Каждая секунда промедления ухудшает ситуацию. Для разблокировки введите секретный код, который знает только тот, кто прислал ссылку.";
 function typeMsg(){const el=$("msg");el.textContent="";let i=0;const id=setInterval(()=>{el.textContent=MSG.slice(0,i+=4);if(i>=MSG.length){clearInterval(id);el.classList.remove("cur")}},12)}
 function tick(){const h=Math.floor(left/3600),m=Math.floor(left%3600/60),s=left%60;$("clock").textContent=[h,m,s].map(n=>String(n).padStart(2,"0")).join(":");left=Math.max(0,left-1)}
 $("f").addEventListener("submit",e=>{
