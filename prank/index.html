@@ -13,7 +13,7 @@ padding-block:12px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-
 #logo{position:absolute;inset:0;display:grid;place-items:center;pointer-events:none}
 [hidden]{display:none!important}
 #logo svg{width:min(34vw,170px);height:auto}
-#lock{display:none;max-width:560px;margin:8vh auto 0;position:relative}
+#lock{display:none;max-width:560px;margin:5vh auto 0;position:relative;padding-bottom:50px}
 #lock.on{display:block}
 #stat{position:fixed;left:max(16px,env(safe-area-inset-left,0px));top:calc(10px + env(safe-area-inset-top,0px));display:none;font-size:15px;color:var(--dim)}#stat.on{display:block}
 #id{position:fixed;right:max(16px,env(safe-area-inset-right,0px));bottom:calc(8px + env(safe-area-inset-bottom,0px));font-size:13px;color:var(--dim)}
@@ -23,7 +23,7 @@ padding-block:12px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-
 #timer.on{display:block}
 .title{background:var(--fill);color:var(--onfill);text-align:center;width:max-content;max-width:90%;margin:0 auto;padding:0 14px}
 .box{border:1px solid var(--ink);padding:8px 10px;margin-top:0}
-.box p{margin:0 0 8px}
+.box p{margin:0 0 8px;font-size:16px;line-height:1.15}
 .box+.box{margin-top:6px}
 .bar{background:var(--fill);color:var(--onfill);height:26px;margin-top:6px;display:flex;align-items:center}
 .bar input{all:unset;width:100%;text-align:center;color:var(--onfill);font:inherit;letter-spacing:.15em}
@@ -40,7 +40,7 @@ button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
 #reveal h1{font-size:clamp(34px,9vw,64px);margin:0 0 10px;font-weight:400;line-height:1}
 #reveal p{margin:0 0 18px;font-size:24px}
 #reveal button{color:var(--onfill);border-color:var(--onfill)}
-#tag{position:fixed;left:max(16px,env(safe-area-inset-left,0px));right:max(16px,env(safe-area-inset-right,0px));bottom:calc(8px + env(safe-area-inset-bottom,0px));font-size:14px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#tag{position:fixed;left:max(16px,env(safe-area-inset-left,0px));right:max(16px,env(safe-area-inset-right,0px));bottom:calc(8px + env(safe-area-inset-bottom,0px));font-size:14px;color:var(--dim);background:var(--bg);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 @media (prefers-reduced-motion:no-preference){#lock.on{animation:in .4s steps(4)}@keyframes in{from{opacity:0}}}
 </style>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=VT323&display=swap">
@@ -52,7 +52,7 @@ button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
 
 <main id="lock">
   <div class="title">Ваши файлы «зашифрованы»!</div>
-  <div class="box"><p>Ваше устройство «заблокировано», а вся память и файлы на нём «зашифрованы» группировкой T1mk6. Любые попытки снять блокировку приведут к тому, что вы немедленно улыбнётесь. Для разблокировки введите секретный код, который знает только тот, кто прислал ссылку.</p></div>
+  <div class="box"><p id="msg" class="cur"></p></div>
   <form class="box" id="f" autocomplete="off">
     <div style="text-align:center">Введите код разблокировки:</div>
     <div class="bar"><input id="code" placeholder="_ _ _ _ _ _" aria-label="Код разблокировки"></div>
@@ -76,9 +76,11 @@ function start(){
   const id=setInterval(()=>{
     if(i<lines.length){$("boot").textContent+=lines[i++]+"\n";return}
     clearInterval(id);$("logo").hidden=false;
-    setTimeout(()=>{$("boot").textContent="";$("logo").hidden=true;$("lock").classList.add("on");$("timer").classList.add("on");$("stat").classList.add("on");$("code").focus();tick();t=setInterval(tick,1000)},2200);
-  },260);
+    setTimeout(()=>{$("boot").textContent="";$("logo").hidden=true;$("lock").classList.add("on");$("timer").classList.add("on");$("stat").classList.add("on");$("code").focus();tick();typeMsg();t=setInterval(tick,1000)},2200);
+  },70);
 }
+const MSG="Ваше устройство «заблокировано», а вся память и все файлы на нём «зашифрованы» группировкой T1mk6. Любые действия, связанные с попыткой снятия блокировки, нанесут непоправимый вред вашему устройству и приведут к потере всех важных файлов без возможности восстановления. При попытке снять блокировку все ваши данные будут «выгружены» в сеть, а на ваш процессор будет подана рекурсивная нагрузка, что приведёт к его «неисправности». Не пытайтесь выключить, перезагрузить или заблокировать устройство. Не удаляйте приложения, не закрывайте вкладку и не сворачивайте экран. Каждая секунда промедления ухудшает ситуацию. Для разблокировки введите секретный код, который знает только тот, кто прислал ссылку.";
+function typeMsg(){const el=$("msg");el.textContent="";let i=0;const id=setInterval(()=>{el.textContent=MSG.slice(0,i+=4);if(i>=MSG.length){clearInterval(id);el.classList.remove("cur")}},12)}
 function tick(){const h=Math.floor(left/3600),m=Math.floor(left%3600/60),s=left%60;$("clock").textContent=[h,m,s].map(n=>String(n).padStart(2,"0")).join(":");left=Math.max(0,left-1)}
 $("f").addEventListener("submit",e=>{
   e.preventDefault();
