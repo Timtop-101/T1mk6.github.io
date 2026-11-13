@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Розыгрыш NCrypt</title>
+<style>
+/* Layout: full-screen black terminal; boot log top-left, centered lock window, countdown top-right. Single magenta-on-black look. */
+:root{--bg:#000;--ink:#ff2bd6;--dim:#a3198a;--fill:#ff2bd6;--onfill:#000;color-scheme:dark;
+--mono:"VT323","Courier New",monospace}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--mono);font-size:20px;line-height:1.25;
+padding-block:12px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));overflow-x:hidden}
+#boot{min-height:130px;white-space:pre-wrap}
+#logo{position:absolute;inset:0;display:grid;place-items:center;pointer-events:none}
+#logo svg{width:min(34vw,170px);height:auto}
+#lock{display:none;max-width:560px;margin:8vh auto 0;position:relative}
+#lock.on{display:block}
+#timer{position:fixed;top:calc(10px + env(safe-area-inset-top,0px));right:max(16px,env(safe-area-inset-right,0px));text-align:center;display:none;font-size:18px}
+#timer.on{display:block}
+.title{background:var(--fill);color:var(--onfill);text-align:center;width:max-content;max-width:90%;margin:0 auto;padding:0 14px}
+.box{border:1px solid var(--ink);padding:8px 10px;margin-top:0}
+.box p{margin:0 0 8px}
+.box+.box{margin-top:6px}
+.bar{background:var(--fill);color:var(--onfill);height:26px;margin-top:6px;display:flex;align-items:center}
+.bar input{all:unset;width:100%;text-align:center;color:var(--onfill);font:inherit;letter-spacing:.15em}
+.bar input::placeholder{color:#5a0b4c}
+.bar input:focus-visible{outline:2px solid #fff;outline-offset:-4px}
+.meta{display:flex;justify-content:space-between;gap:10px;font-size:15px;color:var(--dim);margin-top:6px}
+button{font:inherit;color:var(--ink);background:none;border:1px solid var(--ink);padding:0 10px;cursor:pointer}
+button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+#warn{position:fixed;inset:0;display:none;place-items:center;background:rgba(0,0,0,.6)}
+#warn.on{display:grid}
+#warn div{background:#000;border:1px solid var(--ink);padding:26px 22px;max-width:320px;text-align:center}
+#reveal{position:fixed;inset:0;display:none;place-items:center;background:var(--fill);color:var(--onfill);text-align:center;padding:24px}
+#reveal.on{display:grid}
+#reveal h1{font-size:clamp(34px,9vw,64px);margin:0 0 10px;font-weight:400;line-height:1}
+#reveal p{margin:0 0 18px;font-size:24px}
+#reveal button{color:var(--onfill);border-color:var(--onfill)}
+#tag{position:fixed;left:max(16px,env(safe-area-inset-left,0px));bottom:calc(8px + env(safe-area-inset-bottom,0px));font-size:14px;color:var(--dim)}
+@media (prefers-reduced-motion:no-preference){#lock.on{animation:in .4s steps(4)}@keyframes in{from{opacity:0}}}
+</style>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=VT323&display=swap">
+
+<div id="boot" aria-live="polite"></div>
+<div id="logo" hidden><svg viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="46" fill="none" stroke="#ff2bd6" stroke-width="3"/><circle cx="50" cy="50" r="33" fill="none" stroke="#ff2bd6" stroke-width="1.5"/><circle cx="50" cy="50" r="19" fill="#ff2bd6"/><path d="M12 50h76M50 12v76" stroke="#000" stroke-width="2"/></svg></div>
+<div id="timer"><div>До самоуничтожения:</div><div id="clock">47:59:59</div></div>
+
+<main id="lock">
+  <div class="title">Ваши файлы «зашифрованы»!</div>
+  <div class="box"><p>Ваш компьютер «заблокирован», а все диски и файлы на нём «зашифрованы» группировкой ПРАНК-777. Любые попытки снять блокировку приведут к тому, что вы немедленно улыбнётесь. Для разблокировки введите секретный код, который знает только тот, кто прислал ссылку.</p><p>Подсказка: код начинается на «С днём…».</p></div>
+  <form class="box" id="f" autocomplete="off">
+    <div style="text-align:center">Введите код разблокировки:</div>
+    <div class="bar"><input id="code" placeholder="_ _ _ _ _ _" aria-label="Код разблокировки"></div>
+    <div class="meta"><span>Current PC: DESKTOP-PRANK1</span><button type="submit">[Enter]</button></div>
+  </form>
+</main>
+
+<div id="warn"><div>Замечена и пресечена попытка взломать систему!<br><br><button id="ok" type="button">[OK]</button></div></div>
+<div id="reveal"><div><h1>ЭТО ШУТКА</h1><p>Ничего не зашифровано. С днём рождения!</p><button id="back" type="button">[Ещё раз]</button></div></div>
+<div id="tag">шуточная страница · ничего не устанавливает и не собирает данные</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const lines=["NCrypt started, blocking system. . .","XDWD: 0x03527737","XDWD: 0x0266712","XDWD: 0x02897593","XDWD: 0x01447812","XDWD: 0x0150974","XDWD: 0x03873700","Creator: @pranker (шутка)","  Комп в безопасности :)","","  *  не выключай ПК, сладкий)"];
+let t=null,left=47*3600+55*60+21;
+function start(){
+  clearInterval(t);$("boot").textContent="";$("lock").classList.remove("on");$("timer").classList.remove("on");$("reveal").classList.remove("on");$("logo").hidden=true;
+  let i=0;
+  const id=setInterval(()=>{
+    if(i<lines.length){$("boot").textContent+=lines[i++]+"\n";return}
+    clearInterval(id);$("logo").hidden=false;
+    setTimeout(()=>{$("boot").textContent="";$("logo").hidden=true;$("lock").classList.add("on");$("timer").classList.add("on");$("code").focus();tick();t=setInterval(tick,1000)},2200);
+  },260);
+}
+function tick(){const h=Math.floor(left/3600),m=Math.floor(left%3600/60),s=left%60;$("clock").textContent=[h,m,s].map(n=>String(n).padStart(2,"0")).join(":");left=Math.max(0,left-1)}
+$("f").addEventListener("submit",e=>{
+  e.preventDefault();
+  const v=$("code").value.trim().toLowerCase();
+  if(v.startsWith("с днём")||v.startsWith("с днем")){$("reveal").classList.add("on")}
+  else{$("warn").classList.add("on")}
+});
+$("ok").onclick=()=>{$("warn").classList.remove("on");$("code").value="";$("code").focus()};
+$("back").onclick=()=>{left=47*3600+55*60+21;start()};
+start();
+</script>
+</body></html>
