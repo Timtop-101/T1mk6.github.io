@@ -46,7 +46,7 @@ button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
 
 <main id="lock">
   <div class="title">Ваши файлы «зашифрованы»!</div>
-  <div class="box"><p>Ваш компьютер «заблокирован», а все диски и файлы на нём «зашифрованы» группировкой ПРАНК-777. Любые попытки снять блокировку приведут к тому, что вы немедленно улыбнётесь. Для разблокировки введите секретный код, который знает только тот, кто прислал ссылку.</p><p>Подсказка: код начинается на «С днём…».</p></div>
+  <div class="box"><p>Ваш компьютер «заблокирован», а все диски и файлы на нём «зашифрованы» группировкой ПРАНК-777. Любые попытки снять блокировку приведут к тому, что вы немедленно улыбнётесь. Для разблокировки введите секретный код, который знает только тот, кто прислал ссылку.</p><p>Подсказка: код — слово «шутка».</p></div>
   <form class="box" id="f" autocomplete="off">
     <div style="text-align:center">Введите код разблокировки:</div>
     <div class="bar"><input id="code" placeholder="_ _ _ _ _ _" aria-label="Код разблокировки"></div>
@@ -55,7 +55,7 @@ button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
 </main>
 
 <div id="warn"><div>Замечена и пресечена попытка взломать систему!<br><br><button id="ok" type="button">[OK]</button></div></div>
-<div id="reveal"><div><h1>ЭТО ШУТКА</h1><p>Ничего не зашифровано. С днём рождения!</p><button id="back" type="button">[Ещё раз]</button></div></div>
+<div id="reveal"><div><h1>ЭТО ШУТКА</h1><p>Ничего не зашифровано. Компьютер в полном порядке.</p><button id="back" type="button">[Ещё раз]</button></div></div>
 <div id="tag">шуточная страница · ничего не устанавливает и не собирает данные</div>
 
 <script>
@@ -75,7 +75,7 @@ function tick(){const h=Math.floor(left/3600),m=Math.floor(left%3600/60),s=left%
 $("f").addEventListener("submit",e=>{
   e.preventDefault();
   const v=$("code").value.trim().toLowerCase();
-  if(v.startsWith("с днём")||v.startsWith("с днем")){$("reveal").classList.add("on")}
+  if(v==="шутка"){$("reveal").classList.add("on")}
   else{$("warn").classList.add("on")}
 });
 $("ok").onclick=()=>{$("warn").classList.remove("on");$("code").value="";$("code").focus()};
