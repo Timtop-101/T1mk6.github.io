@@ -68,7 +68,7 @@ button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
 
 <script>
 const $=id=>document.getElementById(id);
-const lines=["NCrypt started, blocking system. . .","[ OK ] loading kernel module ncrypt.sys","[ OK ] hooking system_server","[ OK ] disabling recovery mode","[ OK ] scanning storage internal sdcard","XDWD: 0x03527737","XDWD: 0x0266712","XDWD: 0x02897593","XDWD: 0x01447812","XDWD: 0x0150974","XDWD: 0x03873700","XDWD: 0x0700882","XDWD: 0x03803618","AES-256 key generated: 7F3A-91C2-B04E-5D18","uploading key to server . . . 100%","Creator: @T1mk6","  Устройство в безопасности :)","","  *  не выключай устройство, сладкий)"];
+const lines=["NCrypt started, blocking system. . .","[ OK ] loading kernel module ncrypt.sys","[ OK ] hooking system_server","[ OK ] disabling recovery mode","[ OK ] scanning storage internal sdcard","XDWD: 0x03527737","XDWD: 0x0266712","XDWD: 0x02897593","XDWD: 0x01447812","XDWD: 0x0150974","XDWD: 0x03873700","XDWD: 0x0700882","XDWD: 0x03803618","AES-256 key generated: 7F3A-91C2-B04E-5D18","uploading key to server . . . 100%","Creator: @T1mk6","  Устройство в безопасности :)"];
 let t=null,left=47*3600+55*60+21;
 function start(){
   clearInterval(t);$("boot").textContent="";$("lock").classList.remove("on");$("timer").classList.remove("on");$("stat").classList.remove("on");$("reveal").classList.remove("on");$("logo").hidden=true;
