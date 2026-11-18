@@ -89,12 +89,18 @@ function start(){
   const id=setInterval(()=>{
     if(i<lines.length){$("boot").textContent+=lines[i++]+"\n";return}
     clearInterval(id);$("logo").hidden=false;
-    setTimeout(()=>{$("boot").textContent="";$("logo").hidden=true;$("lock").classList.add("on");$("timer").classList.add("on");$("stat").classList.add("on");$("code").focus();tick();typeMsg();t=setInterval(tick,1000)},2200);
+    setTimeout(()=>{$("boot").textContent="";$("logo").hidden=true;$("lock").classList.add("on");$("timer").classList.add("on");$("stat").classList.add("on");tick();typeMsg();t=setInterval(tick,1000)},2200);
   },70);
 }
 const MSG="Ваше устройство «заблокировано», а вся память и все файлы на нём «зашифрованы» группировкой VBS BLES SMOK. Любые действия, связанные с попыткой снятия блокировки, нанесут непоправимый вред вашему устройству и приведут к потере всех важных файлов без возможности восстановления. При попытке снять блокировку все ваши данные будут «выгружены» в сеть, а на ваш процессор будет подана рекурсивная нагрузка, что приведёт к его «неисправности». Не пытайтесь выключить, перезагрузить или заблокировать устройство. Не удаляйте приложения, не закрывайте вкладку и не сворачивайте экран. Каждая секунда промедления ухудшает ситуацию. Для разблокировки введите секретный код, который знает только тот, кто прислал ссылку.";
 function typeMsg(){const el=$("msg");el.textContent="";let i=0;const id=setInterval(()=>{el.textContent=MSG.slice(0,i+=4);if(i>=MSG.length){clearInterval(id);el.classList.remove("cur")}},12)}
 function tick(){const h=Math.floor(left/3600),m=Math.floor(left%3600/60),s=left%60;$("clock").textContent=[h,m,s].map(n=>String(n).padStart(2,"0")).join(":");left=Math.max(0,left-1)}
+function trap(){$("warn").classList.add("on");beep(140,.25,"sawtooth");setTimeout(()=>beep(110,.3,"sawtooth"),250);document.body.classList.remove("shake");void document.body.offsetWidth;document.body.classList.add("shake")}
+document.addEventListener("keydown",e=>{
+  if(!$("lock").classList.contains("on")||$("reveal").classList.contains("on")||e.target===$("code")||e.ctrlKey||e.metaKey||e.altKey)return;
+  if($("warn").classList.contains("on")){if(e.key==="Enter"||e.key===" "){e.preventDefault();$("ok").click()}return}
+  e.preventDefault();trap();
+});
 $("f").addEventListener("submit",e=>{
   e.preventDefault();
   const v=$("code").value.trim().toLowerCase();
